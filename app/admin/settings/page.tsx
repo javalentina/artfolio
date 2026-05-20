@@ -68,6 +68,7 @@ function ContactSection({ supabase }: { supabase: ReturnType<typeof createClient
   const [youtube, setYoutube]     = useState("");
   const [spotify, setSpotify]     = useState("");
   const [telegram, setTelegram]   = useState("");
+  const [email, setEmail]         = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved]   = useState(false);
 
@@ -80,6 +81,7 @@ function ContactSection({ supabase }: { supabase: ReturnType<typeof createClient
       setYoutube((soc.youtube as string) ?? "");
       setSpotify((soc.spotify as string) ?? "");
       setTelegram((soc.telegram as string) ?? "");
+      setEmail((soc.email as string) ?? "");
     });
   }, []);
 
@@ -87,7 +89,7 @@ function ContactSection({ supabase }: { supabase: ReturnType<typeof createClient
     setSaving(true);
     await patchSettings(supabase, {
       address: { de: addrDe || null, en: addrEn || null, ru: addrRu || null },
-      social: { instagram: instagram || null, youtube: youtube || null, spotify: spotify || null, telegram: telegram || null },
+      social: { instagram: instagram || null, youtube: youtube || null, spotify: spotify || null, telegram: telegram || null, email: email || null },
     }, "Kontakt & Social");
     setSaving(false); setSaved(true); setTimeout(() => setSaved(false), 2500);
   }
@@ -102,6 +104,7 @@ function ContactSection({ supabase }: { supabase: ReturnType<typeof createClient
       </div>
       <div className={cardCls}>
         <h2 className="text-sm font-medium text-zinc-300 dark:text-zinc-300">Social Media</h2>
+        <div><label className={labelCls}>E-Mail</label><input type="email" className={inputCls} value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" /></div>
         <div><label className={labelCls}>Instagram URL</label><input type="url" className={inputCls} value={instagram} onChange={e => setInstagram(e.target.value)} placeholder="https://instagram.com/…" /></div>
         <div><label className={labelCls}>YouTube URL</label><input type="url" className={inputCls} value={youtube} onChange={e => setYoutube(e.target.value)} placeholder="https://youtube.com/…" /></div>
         <div><label className={labelCls}>Spotify URL</label><input type="url" className={inputCls} value={spotify} onChange={e => setSpotify(e.target.value)} placeholder="https://open.spotify.com/…" /></div>
