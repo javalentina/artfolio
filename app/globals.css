@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+:root {
+  --background: hsl(26 12% 11%);
+  --foreground: hsl(40 20% 90%);
+  --card:       hsl(26 10% 13%);
+  --secondary:  hsl(26 8% 17%);
+  --muted:      hsl(26 6% 19%);
+  --muted-fg:   hsl(40 10% 55%);
+  --primary:    hsl(38 35% 58%);
+  --border:     hsl(26 8% 20%);
+  --radius:     0.25rem;
+
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans:  'Outfit', system-ui, sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-muted-fg: var(--muted-fg);
+  --color-primary: var(--primary);
+  --color-border: var(--border);
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-serif);
+  --font-body: var(--font-sans);
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 18px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: hsl(26 12% 11%); }
+::-webkit-scrollbar-thumb { background: hsl(0 0% 20%); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* ── Animations ── */
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(20px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateX(0);     filter: blur(0); }
+}
+
+.animate-reveal-up   { animation: revealUp    0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-fade-in     { animation: fadeIn      0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slide-left  { animation: slideInLeft 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-800 { animation-delay: 800ms; }
+
+/* IntersectionObserver-driven reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
