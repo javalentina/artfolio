@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ARTIST_ID } from "../_lib";
-import { Mail, Users } from "lucide-react";
+import { Mail, Users, Download } from "lucide-react";
 
 type Subscriber = { id: string; email: string; created_at: string; active: boolean };
 
@@ -30,6 +30,16 @@ export default function NewsletterAdmin() {
     return new Date(iso).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
   }
 
+  function exportCsv() {
+    const rows = [["E-Mail", "Datum", "Status"], ...subscribers.map(s => [s.email, formatDate(s.created_at), s.active !== false ? "Aktiv" : "Inaktiv"])];
+    const csv = rows.map(r => r.map(v => `"${v}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "newsletter-abonnenten.csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-3">
@@ -37,7 +47,7 @@ export default function NewsletterAdmin() {
           <h1 className="text-2xl font-light tracking-wide">Newsletter</h1>
           <p className="mt-0.5 text-sm text-zinc-500">Abonnenten-Liste</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-start">
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 px-5 py-3 text-center">
             <p className="text-2xl font-light">{active.length}</p>
             <p className="text-xs text-zinc-500 mt-0.5">Aktiv</p>
@@ -46,6 +56,12 @@ export default function NewsletterAdmin() {
             <p className="text-2xl font-light">{subscribers.length}</p>
             <p className="text-xs text-zinc-500 mt-0.5">Gesamt</p>
           </div>
+          {subscribers.length > 0 && (
+            <button onClick={exportCsv} className="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-xs text-zinc-300 hover:border-zinc-500 hover:text-white transition-colors">
+              <Download className="h-4 w-4" />
+              CSV Export
+            </button>
+          )}
         </div>
       </div>
 

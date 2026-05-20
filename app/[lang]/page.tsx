@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import Script from "next/script";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { tl } from "@/lib/i18n";
@@ -135,8 +136,43 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Sup
     : rawGallery;
   const repRows  = (repertoireRows ?? []) as RepertoireRow[];
 
+  const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://natalia-uchitel.vercel.app";
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Natalia Uchitel",
+    "alternateName": "Наталья Учитель",
+    "jobTitle": lang === "ru" ? "Пианистка" : lang === "en" ? "Pianist" : "Pianistin",
+    "description": lang === "ru"
+      ? "Пианистка из Санкт-Петербурга, живёт в Берлине. Концерты, образовательные проекты, Академия искусств Эссен."
+      : lang === "en"
+      ? "Pianist from St. Petersburg, based in Berlin. Concerts, educational projects, Academy of Arts Essen."
+      : "Pianistin aus St. Petersburg, tätig in Berlin. Konzerte, Bildungsprojekte, Folkwang Universität.",
+    "birthDate": "1996-10-08",
+    "birthPlace": { "@type": "Place", "name": "St. Petersburg, Russia" },
+    "nationality": "Russian",
+    "url": `${BASE}/${lang}`,
+    "sameAs": [],
+    "alumniOf": [
+      { "@type": "EducationalOrganization", "name": "St. Petersburg Conservatory" },
+      { "@type": "EducationalOrganization", "name": "Academy of Arts Essen" },
+    ],
+    "award": [
+      "Robert Schumann Competition 2017",
+      "Gummert Competition 1st Prize 2018",
+      "Slonimsky Chamber Music Grand Prix 2021",
+    ],
+    "knowsLanguage": ["de", "en", "ru"],
+    "worksFor": { "@type": "Organization", "name": "Freelance / Self-employed" },
+  };
+
   return (
     <>
+      <Script
+        id="person-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+      />
       {/* ── HERO ── */}
       <section className="relative h-screen w-full overflow-hidden">
         <HeroTopBar lang={lang} />
