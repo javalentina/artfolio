@@ -17,13 +17,13 @@ type Project = {
   slug: string;
   title: Record<string, string>;
   description: Record<string, string> | null;
-  cover_image: string | null;
 };
 
-const LABELS = {
-  label:    { de: "Projekte",    en: "Projects",   ru: "Проекты"   },
-  title:    { de: "Kreative & Bildungsprojekte", en: "Creative & Educational Projects", ru: "Творческие проекты" },
-  empty:    { de: "Keine Projekte vorhanden.", en: "No projects yet.", ru: "Проектов пока нет." },
+const L = {
+  label: { de: "Projekte",                       en: "Projects",                        ru: "Проекты"               },
+  title: { de: "Kreative & Bildungsprojekte",    en: "Creative & Educational Projects", ru: "Творческие проекты"    },
+  more:  { de: "Mehr erfahren →",                en: "Read more →",                     ru: "Подробнее →"           },
+  empty: { de: "Keine Projekte vorhanden.",       en: "No projects yet.",                ru: "Проектов пока нет."    },
 } as const;
 
 export default async function ProjectsPage({ params }: { params: Promise<{ lang: SupportedLang }> }) {
@@ -32,7 +32,7 @@ export default async function ProjectsPage({ params }: { params: Promise<{ lang:
 
   const { data } = await supabase
     .from("projects")
-    .select("id,slug,title,description,cover_image")
+    .select("id,slug,title,description")
     .eq("artist_id", ARTIST_ID)
     .eq("published", true)
     .order("position");
@@ -40,53 +40,45 @@ export default async function ProjectsPage({ params }: { params: Promise<{ lang:
   const projects = (data ?? []) as Project[];
 
   return (
-    <main className="max-w-5xl mx-auto px-6 md:px-16 pt-32 pb-24">
-      <header className="mb-16">
-        <span className="block text-[0.6rem] uppercase tracking-[0.4em] text-primary mb-4">
-          {LABELS.label[lang]}
-        </span>
-        <h1 className="font-serif text-[clamp(2.5rem,5vw,4rem)] font-light">
-          {LABELS.title[lang]}
-        </h1>
-      </header>
+    <main className="relative py-14 md:py-24 overflow-hidden pt-32 md:pt-40">
+      <div className="relative mx-auto max-w-5xl px-6">
 
-      {projects.length === 0 ? (
-        <p className="text-muted-fg text-sm">{LABELS.empty[lang]}</p>
-      ) : (
-        <div className="grid sm:grid-cols-2 gap-0">
-          {projects.map((p, i) => (
-            <Link
-              key={p.id}
-              href={`/${lang}/projects/${p.slug}`}
-              className={[
-                "cursor-pointer py-7 border-b border-border transition-colors group",
-                i % 2 === 1
-                  ? "sm:pl-12 sm:border-l sm:border-border"
-                  : "sm:pr-12",
-              ].join(" ")}
-            >
-              {p.cover_image && (
-                <div className="aspect-[16/9] overflow-hidden mb-5 bg-card">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={p.cover_image}
-                    alt={tl(p.title, lang)}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                  />
-                </div>
-              )}
-              <h2 className="font-serif text-[1.25rem] font-normal mb-2 transition-colors group-hover:text-primary">
-                {tl(p.title, lang, "–")}
-              </h2>
-              {p.description && tl(p.description, lang) && (
-                <p className="text-[0.75rem] leading-[1.7] text-muted-fg">
-                  {tl(p.description, lang)}
-                </p>
-              )}
-            </Link>
-          ))}
+        <div className="mb-16">
+          <p className="text-[11px] tracking-[0.3em] uppercase text-primary mb-4">
+            {L.label[lang]}
+          </p>
+          <h1 className="font-serif text-[clamp(2.5rem,5vw,4rem)] font-light leading-tight">
+            {L.title[lang]}
+          </h1>
         </div>
-      )}
+
+        {projects.length === 0 ? (
+          <p className="text-sm text-foreground/50">{L.empty[lang]}</p>
+        ) : (
+          <div className="grid gap-px bg-border sm:grid-cols-2">
+            {projects.map(p => (
+              <Link
+                key={p.id}
+                href={`/${lang}/projects/${p.slug}`}
+                className="group bg-background p-10 md:p-12 block"
+              >
+                <h2 className="font-serif text-2xl font-light mb-4 group-hover:text-primary transition-colors leading-tight">
+                  {tl(p.title, lang, "–")}
+                </h2>
+                {p.description && tl(p.description, lang) && (
+                  <p className="text-base leading-relaxed text-foreground/70 text-pretty">
+                    {tl(p.description, lang)}
+                  </p>
+                )}
+                <span className="inline-block mt-6 text-[11px] tracking-[0.2em] uppercase text-primary">
+                  {L.more[lang]}
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
+
+      </div>
     </main>
   );
 }
