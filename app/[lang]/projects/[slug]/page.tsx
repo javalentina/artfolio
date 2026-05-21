@@ -51,7 +51,7 @@ export default async function ProjectDetailPage({
   const subtitle     = tl(c.subtitle,      lang);
   const fullText     = tl(c.fullText,      lang);
   const heroImg      = (c.imageUrl as string) ?? data.cover_image ?? null;
-  const gallery      = (c.gallery      as string[])     ?? [];
+  const gallery      = ((c.gallery      as string[])     ?? []).filter(Boolean);
   const performers   = (c.performers   as Performer[])  ?? [];
   const flowSteps    = (c.flowSteps    as FlowStep[])   ?? [];
   const testimonials = (c.testimonials as Testimonial[]) ?? [];
