@@ -8,11 +8,12 @@ import { useNav } from "./NavContext";
 
 const NAV_LINKS = [
   { key: "bio",        label: { de: "Biografie",  en: "Biography",  ru: "Биография" } },
-  { key: "repertoire", label: { de: "Repertoire", en: "Repertoire", ru: "Репертуар" } },
+  { key: "videos",     label: { de: "Aufnahmen",  en: "Recordings", ru: "Записи"    } },
+  { key: "gallery",    label: { de: "Momente",    en: "Gallery",    ru: "Галерея"   } },
   { key: "concerts",   label: { de: "Konzerte",   en: "Concerts",   ru: "Концерты"  } },
-  { key: "videos",     label: { de: "Videos",     en: "Videos",     ru: "Видео"     } },
-  { key: "gallery",    label: { de: "Galerie",    en: "Gallery",    ru: "Галерея"   } },
-  { key: "projects",   label: { de: "Projekte",   en: "Projects",   ru: "Проекты"   } },
+  { key: "projects",   label: { de: "Kreative",   en: "Projects",   ru: "Проекты"   } },
+  { key: "repertoire", label: { de: "Repertoire", en: "Repertoire", ru: "Репертуар" } },
+  { key: "books",      label: { de: "Bücher",     en: "Books",      ru: "Книги"     } },
   { key: "contact",    label: { de: "Kontakt",    en: "Contact",    ru: "Контакт"   } },
 ] as const;
 

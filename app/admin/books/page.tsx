@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Check, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { loadSettings, patchSettings, uid, inputCls, labelCls, cardCls, saveBtnCls, type S } from "../_lib";
+import { MediaImageInput } from "../_components/MediaImageInput";
 
 type Publication = { id: string; year: string; title: S; description: S; coverUrl: string; buyUrl: string };
 
@@ -75,8 +76,8 @@ export default function BooksAdmin() {
                 </div>
               ))}
               <div>
-                <label className={labelCls}>Cover-Bild URL</label>
-                <input className={inputCls} value={p.coverUrl} onChange={e => update(p.id, "coverUrl", e.target.value)} placeholder="https://…" />
+                <label className={labelCls}>Cover-Bild</label>
+                <MediaImageInput value={p.coverUrl} onChange={v => update(p.id, "coverUrl", v)} />
                 {p.coverUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.coverUrl} alt="" className="mt-2 h-32 object-contain rounded" />

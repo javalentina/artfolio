@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { loadSettings, patchSettings, inputCls, labelCls, cardCls, saveBtnCls } from "../_lib";
+import { MediaImageInput } from "../_components/MediaImageInput";
 
 function SaveBtn({ saving, saved, onClick }: { saving: boolean; saved: boolean; onClick: () => void }) {
   return (
@@ -53,8 +54,8 @@ export default function HeroAdmin() {
       <div className={cardCls}>
         <h2 className="text-sm font-medium text-zinc-300 dark:text-zinc-300">Hero-Bild</h2>
         <div>
-          <label className={labelCls}>Bild-URL</label>
-          <input className={inputCls} value={heroUrl} onChange={e => setHeroUrl(e.target.value)} placeholder="https://…" />
+          <label className={labelCls}>Bild</label>
+          <MediaImageInput value={heroUrl} onChange={setHeroUrl} />
         </div>
         {heroUrl && (
           // eslint-disable-next-line @next/next/no-img-element

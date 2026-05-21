@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus, Trash2, GripVertical, ChevronUp, ChevronDown, Check, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { MediaImageInput } from "../../_components/MediaImageInput";
 
 type Lang = "de" | "en" | "ru";
 const LANGS: Lang[] = ["de", "en", "ru"];
@@ -158,13 +159,11 @@ function ImageEditor({
     <div className="space-y-3">
       <div>
         <label className="block text-xs font-medium text-zinc-500 mb-1 uppercase tracking-wider">
-          Bild-URL
+          Bild
         </label>
-        <input
-          className={inputCls}
+        <MediaImageInput
           value={(content.url as string) ?? ""}
-          placeholder="https://…"
-          onChange={(e) => onChange({ ...content, url: e.target.value })}
+          onChange={(v) => onChange({ ...content, url: v })}
         />
       </div>
       {Boolean(content.url) && (

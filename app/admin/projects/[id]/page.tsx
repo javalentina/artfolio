@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { saveEntityVersion } from "../../_lib";
 import { ArrowLeft, Check, ExternalLink, Loader2, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { MediaImageInput } from "../../_components/MediaImageInput";
 
 const iCls = "w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none";
 const lCls = "block text-xs font-medium text-zinc-500 mb-1 uppercase tracking-wider";
@@ -237,8 +238,8 @@ export default function ProjectContentEditor() {
         {tab === "hero" && <>
           <Card title="Hero-Bild">
             <div>
-              <label className={lCls}>Bild-URL</label>
-              <input className={iCls} value={content.imageUrl} onChange={e => upd("imageUrl", e.target.value)} placeholder="https://…" />
+              <label className={lCls}>Bild</label>
+              <MediaImageInput value={content.imageUrl} onChange={v => upd("imageUrl", v)} />
             </div>
             {content.imageUrl && (
               <img src={content.imageUrl} alt="" className="h-40 w-full rounded-xl object-cover border border-zinc-800" />
@@ -338,9 +339,9 @@ export default function ProjectContentEditor() {
                         onChange={e => upd("performers", content.performers.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
                     </div>
                     <div>
-                      <label className={lCls}>Foto URL</label>
-                      <input className={iCls} value={p.photoUrl} placeholder="https://…"
-                        onChange={e => upd("performers", content.performers.map((x, j) => j === i ? { ...x, photoUrl: e.target.value } : x))} />
+                      <label className={lCls}>Foto</label>
+                      <MediaImageInput value={p.photoUrl}
+                        onChange={v => upd("performers", content.performers.map((x, j) => j === i ? { ...x, photoUrl: v } : x))} />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -410,8 +411,10 @@ export default function ProjectContentEditor() {
             <div className="space-y-2">
               {content.gallery.map((url, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <input className={iCls + " flex-1"} value={url} placeholder="https://…"
-                    onChange={e => upd("gallery", content.gallery.map((u, j) => j === i ? e.target.value : u))} />
+                  <div className="flex-1">
+                    <MediaImageInput value={url}
+                      onChange={v => upd("gallery", content.gallery.map((u, j) => j === i ? v : u))} />
+                  </div>
                   {url && <img src={url} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover border border-zinc-700" />}
                   <button onClick={() => upd("gallery", content.gallery.filter((_, j) => j !== i))}
                     className="shrink-0 text-zinc-600 hover:text-red-400 transition-colors"><Trash2 className="h-4 w-4" /></button>

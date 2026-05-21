@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { loadSettings, patchNameAndSettings, inputCls, labelCls, cardCls, saveBtnCls, type S } from "../_lib";
+import { MediaImageInput } from "../_components/MediaImageInput";
 
 function SaveBtn({ saving, saved, onClick }: { saving: boolean; saved: boolean; onClick: () => void }) {
   return (
@@ -69,8 +70,8 @@ export default function BioAdmin() {
         <h2 className="text-sm font-medium text-zinc-300 dark:text-zinc-300">Profil</h2>
         <div><label className={labelCls}>Name</label><input className={inputCls} value={name} onChange={e => setName(e.target.value)} /></div>
         <div>
-          <label className={labelCls}>Foto URL</label>
-          <input className={inputCls} value={photoUrl} onChange={e => setPhotoUrl(e.target.value)} placeholder="https://…" />
+          <label className={labelCls}>Foto</label>
+          <MediaImageInput value={photoUrl} onChange={setPhotoUrl} />
           {photoUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={photoUrl} alt="" className="mt-2 h-28 w-28 object-cover rounded-lg" />

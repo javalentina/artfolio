@@ -327,94 +327,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Sup
         </>
       )}
 
-      {/* ── BÜCHER (PUBLICATIONS) ── */}
-      {publications.length > 0 && (
-        <>
-          <ScrollReveal>
-            <section id="books" className="py-12 md:py-20">
-              <div className="mx-auto max-w-6xl px-6 md:px-12">
-                <div className="mb-14">
-                  <p className="text-[0.6rem] uppercase tracking-[0.4em] text-primary mb-4">{t("pub_label", lang)}</p>
-                  <h2 className="font-serif text-[clamp(2.5rem,5vw,4rem)] font-light leading-none">{t("pub_title", lang, sl("pub_title"))}</h2>
-                </div>
-                <div className="grid sm:grid-cols-2 gap-px bg-border/30">
-                  {publications.map(pub => (
-                    <div key={pub.id} className="bg-background p-8 md:p-12 space-y-5">
-                      <div>
-                        <p className="font-serif text-[clamp(2rem,4vw,3rem)] font-light text-primary/70 leading-none mb-4">
-                          {pub.year}
-                        </p>
-                        <div className="h-px bg-border/60 mb-5" />
-                        <h3 className="font-serif text-[clamp(1.4rem,2.5vw,2rem)] font-light leading-tight text-foreground/90 mb-4">
-                          {tl(pub.title, lang)}
-                        </h3>
-                        {tl(pub.description, lang) && (
-                          <p className="text-sm leading-relaxed text-foreground/60">
-                            {tl(pub.description, lang)}
-                          </p>
-                        )}
-                      </div>
-                      {pub.buyUrl ? (
-                        <a href={pub.buyUrl} target="_blank" rel="noopener noreferrer"
-                          className="inline-block border border-primary/30 px-5 py-2 text-[0.6rem] uppercase tracking-[0.25em] text-primary hover:bg-primary/10 transition-colors">
-                          {t("pub_buy", lang)}
-                        </a>
-                      ) : (
-                        <span className="inline-block border border-border/40 px-5 py-2 text-[0.6rem] uppercase tracking-[0.25em] text-foreground/30">
-                          {t("pub_soon", lang)}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-12">
-                  <NewsletterSignup lang={lang} />
-                </div>
-              </div>
-            </section>
-          </ScrollReveal>
-        </>
-      )}
-
-      {/* ── CONCERTS ── */}
-      <SectionDivider />
-      <ScrollReveal>
-        <section id="concerts" className="py-16 md:py-28">
-          <div className="mx-auto max-w-4xl px-6 md:px-16">
-            <div className="mb-16">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="h-px w-10 bg-primary" />
-                <p className="text-[11px] tracking-[0.4em] uppercase text-primary">{t("con_label", lang)}</p>
-              </div>
-              <h2 className="font-serif text-[clamp(2.5rem,5vw,4rem)] font-light">{t("con_title", lang, sl("con_title"))}</h2>
-            </div>
-
-            {!upcoming.length ? (
-              <p className="text-muted-fg text-sm py-8 border-t border-border">{t("no_con", lang)}</p>
-            ) : (
-              <div className="border-t border-border">
-                {upcoming.map(c => (
-                  <div key={c.id} className="group flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-0 py-5 border-b border-border hover:bg-secondary/30 transition-colors sm:px-4">
-                    <span className="w-44 text-sm tracking-[0.15em] uppercase text-primary shrink-0">{formatDate(c.date, lang)}</span>
-                    <span className="font-serif text-2xl md:text-3xl font-light flex-1">{tl(c.city, lang) || tl(c.title, lang, "–")}</span>
-                    <span className="text-base text-foreground/75">{tl(c.venue, lang)}</span>
-                    {c.ticket_url && (
-                      <a href={c.ticket_url} target="_blank" rel="noopener noreferrer"
-                        className="sm:ml-4 shrink-0 text-[0.65rem] uppercase tracking-[0.15em] text-primary border-b border-transparent hover:border-primary transition-colors pb-px">
-                        {t("tickets", lang)}
-                      </a>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <ConcertsPastSection past={past} lang={lang} />
-          </div>
-        </section>
-      </ScrollReveal>
-
-      {/* ── VIDEOS ── */}
+      {/* ── VIDEOS (AUFNAHMEN) ── */}
       {videos.length > 0 && (
         <>
           <SectionDivider />
@@ -462,9 +375,10 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Sup
         </>
       )}
 
-      {/* ── GALLERY ── */}
+      {/* ── GALLERY (MOMENTE) ── */}
       {gallery.length > 0 && (
         <>
+          <SectionDivider />
           <ScrollReveal>
             <section id="gallery" className="py-14 md:py-24">
               <div className="mx-auto max-w-5xl px-6">
@@ -476,13 +390,51 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Sup
               </div>
             </section>
           </ScrollReveal>
-          <SectionDivider />
         </>
       )}
 
-      {/* ── PROJECTS ── */}
+      {/* ── CONCERTS ── */}
+      <SectionDivider />
+      <ScrollReveal>
+        <section id="concerts" className="py-16 md:py-28">
+          <div className="mx-auto max-w-4xl px-6 md:px-16">
+            <div className="mb-16">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="h-px w-10 bg-primary" />
+                <p className="text-[11px] tracking-[0.4em] uppercase text-primary">{t("con_label", lang)}</p>
+              </div>
+              <h2 className="font-serif text-[clamp(2.5rem,5vw,4rem)] font-light">{t("con_title", lang, sl("con_title"))}</h2>
+            </div>
+
+            {!upcoming.length ? (
+              <p className="text-muted-fg text-sm py-8 border-t border-border">{t("no_con", lang)}</p>
+            ) : (
+              <div className="border-t border-border">
+                {upcoming.map(c => (
+                  <div key={c.id} className="group flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-0 py-5 border-b border-border hover:bg-secondary/30 transition-colors sm:px-4">
+                    <span className="w-44 text-sm tracking-[0.15em] uppercase text-primary shrink-0">{formatDate(c.date, lang)}</span>
+                    <span className="font-serif text-2xl md:text-3xl font-light flex-1">{tl(c.city, lang) || tl(c.title, lang, "–")}</span>
+                    <span className="text-base text-foreground/75">{tl(c.venue, lang)}</span>
+                    {c.ticket_url && (
+                      <a href={c.ticket_url} target="_blank" rel="noopener noreferrer"
+                        className="sm:ml-4 shrink-0 text-[0.65rem] uppercase tracking-[0.15em] text-primary border-b border-transparent hover:border-primary transition-colors pb-px">
+                        {t("tickets", lang)}
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <ConcertsPastSection past={past} lang={lang} />
+          </div>
+        </section>
+      </ScrollReveal>
+
+      {/* ── PROJECTS (KREATIVE) ── */}
       {projects && projects.length > 0 && (
         <>
+          <SectionDivider />
           <ScrollReveal>
             <section id="projects" className="relative py-14 md:py-24 overflow-hidden">
               <div className="relative mx-auto max-w-5xl px-6">
@@ -520,23 +472,73 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Sup
               </div>
             </section>
           </ScrollReveal>
-          <SectionDivider variant="line" />
         </>
       )}
 
       {/* ── REPERTOIRE ── */}
       {repRows.length > 0 && (
         <>
+          <SectionDivider variant="line" />
           <ScrollReveal>
             <div id="repertoire">
               <RepertoireHomeSection rows={repRows} lang={lang} tabOrder={repTabOrder} />
             </div>
           </ScrollReveal>
+        </>
+      )}
+
+      {/* ── BÜCHER (PUBLICATIONS) ── */}
+      {publications.length > 0 && (
+        <>
           <SectionDivider />
+          <ScrollReveal>
+            <section id="books" className="py-12 md:py-20">
+              <div className="mx-auto max-w-6xl px-6 md:px-12">
+                <div className="mb-14">
+                  <p className="text-[0.6rem] uppercase tracking-[0.4em] text-primary mb-4">{t("pub_label", lang)}</p>
+                  <h2 className="font-serif text-[clamp(2.5rem,5vw,4rem)] font-light leading-none">{t("pub_title", lang, sl("pub_title"))}</h2>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-px bg-border/30">
+                  {publications.map(pub => (
+                    <div key={pub.id} className="bg-background p-8 md:p-12 space-y-5">
+                      <div>
+                        <p className="font-serif text-[clamp(2rem,4vw,3rem)] font-light text-primary/70 leading-none mb-4">
+                          {pub.year}
+                        </p>
+                        <div className="h-px bg-border/60 mb-5" />
+                        <h3 className="font-serif text-[clamp(1.4rem,2.5vw,2rem)] font-light leading-tight text-foreground/90 mb-4">
+                          {tl(pub.title, lang)}
+                        </h3>
+                        {tl(pub.description, lang) && (
+                          <p className="text-sm leading-relaxed text-foreground/60">
+                            {tl(pub.description, lang)}
+                          </p>
+                        )}
+                      </div>
+                      {pub.buyUrl ? (
+                        <a href={pub.buyUrl} target="_blank" rel="noopener noreferrer"
+                          className="inline-block border border-primary/30 px-5 py-2 text-[0.6rem] uppercase tracking-[0.25em] text-primary hover:bg-primary/10 transition-colors">
+                          {t("pub_buy", lang)}
+                        </a>
+                      ) : (
+                        <span className="inline-block border border-border/40 px-5 py-2 text-[0.6rem] uppercase tracking-[0.25em] text-foreground/30">
+                          {t("pub_soon", lang)}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-12">
+                  <NewsletterSignup lang={lang} />
+                </div>
+              </div>
+            </section>
+          </ScrollReveal>
         </>
       )}
 
       {/* ── CONTACT ── */}
+      <SectionDivider />
       <ScrollReveal>
         <section id="contact" className="py-14 md:py-24">
           <div className="mx-auto max-w-5xl px-6">

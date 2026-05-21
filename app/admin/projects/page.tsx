@@ -2,12 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Check, X, Eye, EyeOff, GripVertical, ChevronDown, ChevronUp, LayoutTemplate } from "lucide-react";
+import { MediaImageInput } from "../_components/MediaImageInput";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { saveEntityVersion } from "../_lib";
 import { cn } from "@/lib/utils";
 
 const ARTIST_ID = "23f1f611-5ba9-4c78-9a71-bd3ea1c7856a";
+
+function makeSlug(title: string): string {
+  return title.toLowerCase()
+    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "projekt";
+}
 
 type ContentFields = {
   subtitle_de: string; subtitle_en: string; subtitle_ru: string;
@@ -20,8 +27,7 @@ type Project = {
   id: string;
   title: Record<string, string>;
   description: Record<string, string>;
-  category: string | null;
-  year: number | null;
+  slug: string;
   cover_image: string | null;
   published: boolean;
   position: number;
@@ -35,8 +41,6 @@ type FormData = {
   description_de: string;
   description_en: string;
   description_ru: string;
-  category: string;
-  year: string;
   cover_image: string;
   published: boolean;
 } & ContentFields;
@@ -44,7 +48,7 @@ type FormData = {
 const empty: FormData = {
   title_de: "", title_en: "", title_ru: "",
   description_de: "", description_en: "", description_ru: "",
-  category: "", year: "", cover_image: "", published: true,
+  cover_image: "", published: true,
   subtitle_de: "", subtitle_en: "", subtitle_ru: "",
   fullText_de: "", fullText_en: "", fullText_ru: "",
   imageUrl: "", youtubeId: "",
@@ -62,7 +66,6 @@ export default function ProjectsAdmin() {
   const [form, setForm] = useState<FormData>(empty);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [draftLoaded, setDraftLoaded] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [overIdx, setOverIdx] = useState<number | null>(null);
   const [showContent, setShowContent] = useState(false);
@@ -70,7 +73,7 @@ export default function ProjectsAdmin() {
   async function load() {
     const { data } = await supabase
       .from("projects")
-      .select("id,title,description,category,year,cover_image,published,position,content")
+      .select("id,title,description,slug,cover_image,published,position,content")
       .eq("artist_id", ARTIST_ID)
       .order("position");
     setProjects((data ?? []) as Project[]);
@@ -79,20 +82,8 @@ export default function ProjectsAdmin() {
 
   useEffect(() => { load(); }, []);
 
-  useEffect(() => {
-    if (!showForm) return;
-    try { localStorage.setItem(`artfolio_project_${editing ?? "new"}`, JSON.stringify(form)); } catch {}
-  }, [form, showForm, editing]);
-
-  function tryLoadDraft(key: string): FormData | null {
-    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; }
-  }
-  function clearDraft(key: string) { try { localStorage.removeItem(key); } catch {} }
-
   function openNew() {
-    const draft = tryLoadDraft("artfolio_project_new");
-    setForm(draft ?? empty);
-    setDraftLoaded(!!draft);
+    setForm(empty);
     setEditing(null);
     setSaveError(null);
     setShowForm(true);
@@ -102,25 +93,20 @@ export default function ProjectsAdmin() {
     const c = (p.content ?? {}) as Record<string, unknown>;
     const sub = (c.subtitle ?? {}) as Record<string, string>;
     const ft  = (c.fullText  ?? {}) as Record<string, string>;
-    const base: FormData = {
+    setForm({
       title_de: p.title?.de ?? "",
       title_en: p.title?.en ?? "",
       title_ru: p.title?.ru ?? "",
       description_de: p.description?.de ?? "",
       description_en: p.description?.en ?? "",
       description_ru: p.description?.ru ?? "",
-      category: p.category ?? "",
-      year: p.year ? String(p.year) : "",
       cover_image: p.cover_image ?? "",
       published: p.published,
       subtitle_de: sub.de ?? "", subtitle_en: sub.en ?? "", subtitle_ru: sub.ru ?? "",
       fullText_de: ft.de ?? "",  fullText_en: ft.en ?? "",  fullText_ru: ft.ru ?? "",
       imageUrl: (c.imageUrl as string) ?? "",
       youtubeId: (c.youtubeId as string) ?? "",
-    };
-    const draft = tryLoadDraft(`artfolio_project_${p.id}`);
-    setForm(draft ?? base);
-    setDraftLoaded(!!draft);
+    });
     setEditing(p.id);
     setSaveError(null);
     setShowForm(true);
@@ -134,8 +120,6 @@ export default function ProjectsAdmin() {
     const payload = {
       title: { de: form.title_de, en: form.title_en, ru: form.title_ru },
       description: { de: form.description_de, en: form.description_en, ru: form.description_ru },
-      category: form.category || null,
-      year: form.year ? parseInt(form.year) : null,
       cover_image: form.cover_image || null,
       published: form.published,
       content: {
@@ -150,17 +134,19 @@ export default function ProjectsAdmin() {
       let savedId = editing;
       if (editing) {
         const { error } = await supabase.from("projects").update(payload).eq("id", editing);
-        if (error) throw error;
+        if (error) throw new Error(error.message);
       } else {
-        const { data: inserted, error } = await supabase.from("projects").insert({ ...payload, artist_id: ARTIST_ID, position: projects.length }).select("id").single();
-        if (error) throw error;
+        const slug = makeSlug(form.title_de || form.title_en);
+        const { data: inserted, error } = await supabase.from("projects")
+          .insert({ ...payload, slug, artist_id: ARTIST_ID, position: projects.length })
+          .select("id").single();
+        if (error) throw new Error(error.message);
         savedId = inserted?.id ?? null;
       }
       if (savedId) {
         const label = `Projekt: ${form.title_de}`;
         await saveEntityVersion(supabase, "project", savedId, payload as Record<string, unknown>, label);
       }
-      clearDraft(`artfolio_project_${editing ?? "new"}`);
       setShowForm(false);
       setEditing(null);
       load();
@@ -192,8 +178,6 @@ export default function ProjectsAdmin() {
     setDragIdx(null); setOverIdx(null);
     load();
   }
-
-  const categories = [...new Set(projects.map(p => p.category).filter(Boolean))];
 
   return (
     <div className="space-y-6">
@@ -246,9 +230,7 @@ export default function ProjectsAdmin() {
                 <p className="font-medium text-zinc-100 dark:text-zinc-100 truncate">
                   {p.title?.de || p.title?.en || "–"}
                 </p>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  {[p.category, p.year].filter(Boolean).join(" · ")}
-                </p>
+                <p className="text-xs text-zinc-400 mt-0.5">{p.slug}</p>
               </div>
 
               <div className="flex items-center shrink-0">
@@ -289,14 +271,6 @@ export default function ProjectsAdmin() {
               </button>
             </div>
 
-            {/* Draft restored banner */}
-            {draftLoaded && (
-              <div className="mx-5 mt-3 flex items-center justify-between rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-xs text-amber-400 shrink-0">
-                <span>Nicht gespeicherte Änderungen wiederhergestellt</span>
-                <button onClick={() => { setDraftLoaded(false); clearDraft(`artfolio_project_${editing ?? "new"}`); setForm(empty); }} className="ml-3 underline hover:text-amber-200 shrink-0">Verwerfen</button>
-              </div>
-            )}
-
             {/* Scrollable body */}
             <div className="overflow-y-auto flex-1 px-5 py-5 space-y-5 lg:grid lg:grid-cols-2 lg:gap-x-6 lg:gap-y-5 lg:space-y-0 lg:content-start">
 
@@ -305,15 +279,10 @@ export default function ProjectsAdmin() {
                 <input className={inputCls} value={form.title_de} onChange={e => setForm(f => ({ ...f, title_de: e.target.value }))} placeholder="Trio-Konzert" />
               </div>
               <div>
-                <label className={labelCls}>Kategorie</label>
-                <input className={inputCls} value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} placeholder="Kammermusik" list="categories" />
-                <datalist id="categories">{categories.map(c => <option key={c} value={c!} />)}</datalist>
-              </div>
-              <div>
                 <label className={labelCls}>Titel (EN)</label>
                 <input className={inputCls} value={form.title_en} onChange={e => setForm(f => ({ ...f, title_en: e.target.value }))} />
               </div>
-              <div>
+              <div className="lg:col-span-2">
                 <label className={labelCls}>Titel (RU)</label>
                 <input className={inputCls} value={form.title_ru} onChange={e => setForm(f => ({ ...f, title_ru: e.target.value }))} />
               </div>
@@ -333,8 +302,8 @@ export default function ProjectsAdmin() {
 
               <div className="lg:col-span-2 flex gap-6 items-start">
                 <div className="flex-1">
-                  <label className={labelCls}>Cover Bild URL</label>
-                  <input className={inputCls} value={form.cover_image} onChange={e => setForm(f => ({ ...f, cover_image: e.target.value }))} placeholder="https://…" />
+                  <label className={labelCls}>Cover Bild</label>
+                  <MediaImageInput value={form.cover_image} onChange={v => setForm(f => ({ ...f, cover_image: v }))} />
                 </div>
                 {form.cover_image && (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -342,15 +311,11 @@ export default function ProjectsAdmin() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between lg:col-span-2">
+              <div className="lg:col-span-2">
                 <label className="flex items-center gap-3 text-sm text-zinc-300 cursor-pointer">
                   <input type="checkbox" checked={form.published} onChange={e => setForm(f => ({ ...f, published: e.target.checked }))} className="h-4 w-4 rounded accent-amber-400" />
                   Veröffentlicht
                 </label>
-                <div>
-                  <label className={labelCls}>Jahr</label>
-                  <input type="number" className={inputCls + " w-28"} value={form.year} onChange={e => setForm(f => ({ ...f, year: e.target.value }))} placeholder="2024" min="1900" max="2100" />
-                </div>
               </div>
 
               {/* ── Page Content ─────────────────────────────────────────── */}
@@ -392,8 +357,8 @@ export default function ProjectsAdmin() {
                     <textarea className={inputCls + " resize-y"} rows={5} value={form.fullText_ru} onChange={e => setForm(f => ({ ...f, fullText_ru: e.target.value }))} />
                   </div>
                   <div>
-                    <label className={labelCls}>Hero Bild URL (Seite)</label>
-                    <input className={inputCls} value={form.imageUrl} onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))} placeholder="https://…" />
+                    <label className={labelCls}>Hero Bild (Seite)</label>
+                    <MediaImageInput value={form.imageUrl} onChange={v => setForm(f => ({ ...f, imageUrl: v }))} />
                   </div>
                   <div>
                     <label className={labelCls}>YouTube ID</label>
