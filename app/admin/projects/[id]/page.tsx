@@ -362,7 +362,7 @@ export default function ProjectContentEditor() {
                       <div className="flex gap-3 items-start">
                         {/* Full image — click to place dot */}
                         <div
-                          className="relative flex-1 rounded-xl border border-zinc-700 cursor-crosshair select-none overflow-hidden max-h-48"
+                          className="relative rounded-xl border border-zinc-700 cursor-crosshair select-none overflow-hidden"
                           onClick={e => {
                             const rect = e.currentTarget.getBoundingClientRect();
                             const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
@@ -371,7 +371,7 @@ export default function ProjectContentEditor() {
                           }}
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={p.photoUrl} alt="" draggable={false} className="w-full h-auto block pointer-events-none" />
+                          <img src={p.photoUrl} alt="" draggable={false} className="max-h-[200px] w-auto block pointer-events-none" />
                           <div
                             className="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-amber-400/80 shadow-md pointer-events-none ring-1 ring-black/40"
                             style={{ left: `${p.focalX}%`, top: `${p.focalY}%` }}
