@@ -147,7 +147,7 @@ export default async function ProjectDetailPage({
         <section id="concept" className="py-24 md:py-32">
           <div className="mx-auto grid max-w-6xl gap-16 px-6 md:grid-cols-2 md:gap-20">
             <div>
-              <p className="text-sm tracking-[0.3em] uppercase text-primary mb-4">{label}</p>
+              <p className="text-sm tracking-[0.3em] uppercase text-primary mb-4">{tl(c.conceptLabel, lang) || label}</p>
               <h2 className="font-serif text-4xl font-light leading-tight md:text-5xl">{tl(c.conceptTitle, lang) || L(CONCEPT)}</h2>
             </div>
             <div className="space-y-6 text-lg leading-[1.8] text-foreground/85">

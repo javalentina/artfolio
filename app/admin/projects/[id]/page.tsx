@@ -28,7 +28,7 @@ type FlowStep    = { id: string; titleDE: string; titleEN: string; titleRU: stri
 type Testimonial = { id: string; name: string; professionDE: string; professionEN: string; professionRU: string; textDE: string; textEN: string; textRU: string };
 
 type Content = {
-  label: ML; conceptTitle: ML; subtitle: ML; fullText: ML; imageUrl: string; youtubeId: string; heroCta: ML;
+  label: ML; conceptLabel: ML; conceptTitle: ML; subtitle: ML; fullText: ML; imageUrl: string; youtubeId: string; heroCta: ML;
   flowSteps: FlowStep[]; statDuration: ML; statFormat: ML; statPartner: string;
   performers: Performer[]; testimonials: Testimonial[]; gallery: string[];
   partnerTitle: ML; partnerBody: ML; eventEmail: string;
@@ -38,7 +38,7 @@ type Content = {
 
 function emptyContent(): Content {
   return {
-    label: emptyML(), conceptTitle: emptyML(), subtitle: emptyML(), fullText: emptyML(), imageUrl: "", youtubeId: "", heroCta: emptyML(),
+    label: emptyML(), conceptLabel: emptyML(), conceptTitle: emptyML(), subtitle: emptyML(), fullText: emptyML(), imageUrl: "", youtubeId: "", heroCta: emptyML(),
     flowSteps: [], statDuration: emptyML(), statFormat: emptyML(), statPartner: "",
     performers: [], testimonials: [], gallery: [],
     partnerTitle: emptyML(), partnerBody: emptyML(), eventEmail: "",
@@ -52,6 +52,7 @@ function emptyContent(): Content {
 function fromDB(c: Record<string, unknown>): Content {
   return {
     label:             mlFrom(c.label),
+    conceptLabel:      mlFrom(c.conceptLabel),
     conceptTitle:      mlFrom(c.conceptTitle),
     subtitle:          mlFrom(c.subtitle),
     fullText:          mlFrom(c.fullText),
@@ -264,6 +265,8 @@ export default function ProjectContentEditor() {
         {/* TEXTE */}
         {tab === "text" && <>
           <Card title="Haupttext / Konzept">
+            <MLInput label="Eyebrow (goldene Zeile über dem Abschnittstitel)" val={content.conceptLabel} set={v => upd("conceptLabel", v)} />
+            <p className="text-xs text-zinc-600 -mt-3">Leer lassen → wie das Label aus dem Hero-Tab</p>
             <MLInput label="Abschnittstitel (links neben dem Text)" val={content.conceptTitle} set={v => upd("conceptTitle", v)} />
             <p className="text-xs text-zinc-600 -mt-3">Leer lassen → Standard: Das Konzept / The Concept / Концепция</p>
             <MLArea label="Volltext (Absätze mit Leerzeile trennen)" val={content.fullText} set={v => upd("fullText", v)} rows={10} />
