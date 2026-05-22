@@ -28,7 +28,7 @@ type FlowStep    = { id: string; titleDE: string; titleEN: string; titleRU: stri
 type Testimonial = { id: string; name: string; professionDE: string; professionEN: string; professionRU: string; textDE: string; textEN: string; textRU: string };
 
 type Content = {
-  subtitle: ML; fullText: ML; imageUrl: string; youtubeId: string; heroCta: ML;
+  label: ML; subtitle: ML; fullText: ML; imageUrl: string; youtubeId: string; heroCta: ML;
   flowSteps: FlowStep[]; statDuration: ML; statFormat: ML; statPartner: string;
   performers: Performer[]; testimonials: Testimonial[]; gallery: string[];
   partnerTitle: ML; partnerBody: ML; eventEmail: string;
@@ -38,7 +38,7 @@ type Content = {
 
 function emptyContent(): Content {
   return {
-    subtitle: emptyML(), fullText: emptyML(), imageUrl: "", youtubeId: "", heroCta: emptyML(),
+    label: emptyML(), subtitle: emptyML(), fullText: emptyML(), imageUrl: "", youtubeId: "", heroCta: emptyML(),
     flowSteps: [], statDuration: emptyML(), statFormat: emptyML(), statPartner: "",
     performers: [], testimonials: [], gallery: [],
     partnerTitle: emptyML(), partnerBody: emptyML(), eventEmail: "",
@@ -51,6 +51,7 @@ function emptyContent(): Content {
 
 function fromDB(c: Record<string, unknown>): Content {
   return {
+    label:             mlFrom(c.label),
     subtitle:          mlFrom(c.subtitle),
     fullText:          mlFrom(c.fullText),
     imageUrl:          str(c.imageUrl),
@@ -237,6 +238,10 @@ export default function ProjectContentEditor() {
 
         {/* HERO */}
         {tab === "hero" && <>
+          <Card title="Label / Eyebrow (goldene Beschriftung über dem Titel)">
+            <MLInput label="Label" val={content.label} set={v => upd("label", v)} />
+            <p className="text-xs text-zinc-600">Leer lassen → Standard: Projekte / Projects / Проекты</p>
+          </Card>
           <Card title="Hero-Bild">
             <div>
               <label className={lCls}>Bild</label>

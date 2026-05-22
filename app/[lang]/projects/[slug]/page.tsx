@@ -47,7 +47,7 @@ export default async function ProjectDetailPage({
   const c = (data.content ?? {}) as Record<string, unknown>;
 
   const title        = tl(data.title, lang);
-  const label        = tl({ de: "Projekte", en: "Projects", ru: "Проекты" }, lang);
+  const label        = tl(c.label, lang) || tl({ de: "Projekte", en: "Projects", ru: "Проекты" }, lang);
   const subtitle     = tl(c.subtitle,      lang);
   const fullText     = tl(c.fullText,      lang);
   const heroImg      = (c.imageUrl as string) ?? data.cover_image ?? null;
