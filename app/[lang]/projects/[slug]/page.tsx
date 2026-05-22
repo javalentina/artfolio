@@ -251,7 +251,7 @@ export default async function ProjectDetailPage({
                       <div className="mx-auto mb-6 h-32 w-32 overflow-hidden rounded-full border border-primary/20 bg-secondary/30 flex items-center justify-center">
                         {p.photoUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={p.photoUrl} alt={p.name} className="h-full w-full object-cover" />
+                          <img src={p.photoUrl} alt={p.name} className="h-full w-full object-cover object-top" />
                         ) : (
                           <span className="font-serif text-2xl font-light text-primary/60">
                             {p.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
