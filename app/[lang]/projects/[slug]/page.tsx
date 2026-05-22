@@ -83,6 +83,7 @@ export default async function ProjectDetailPage({
   const hasConversion = !!(eventWhen || eventWhere || eventNote || eventDuration || conversionTitle || eventEmail);
 
   const BACK = { de: "← Alle Projekte", en: "← All Projects", ru: "← Все проекты" };
+  const CONCEPT = { de: "Das Konzept", en: "The Concept", ru: "Концепция" };
   const ENSEMBLE = { de: "Das Ensemble", en: "The Ensemble", ru: "Ансамбль" };
   const REVIEWS  = { de: "Was Gäste sagen", en: "What Guests Say", ru: "Что говорят гости" };
   const MORE     = { de: "Mehr erfahren", en: "Learn more", ru: "Узнать больше" };
@@ -147,7 +148,7 @@ export default async function ProjectDetailPage({
           <div className="mx-auto grid max-w-6xl gap-16 px-6 md:grid-cols-2 md:gap-20">
             <div>
               <p className="text-sm tracking-[0.3em] uppercase text-primary mb-4">{label}</p>
-              <h2 className="font-serif text-4xl font-light leading-tight md:text-5xl">{title}</h2>
+              <h2 className="font-serif text-4xl font-light leading-tight md:text-5xl">{L(CONCEPT)}</h2>
             </div>
             <div className="space-y-6 text-lg leading-[1.8] text-foreground/85">
               {paragraphs.map((para, i) => (

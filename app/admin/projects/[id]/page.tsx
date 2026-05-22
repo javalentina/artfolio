@@ -356,7 +356,7 @@ export default function ProjectContentEditor() {
                       <div className="flex gap-3 items-start">
                         {/* Full image — click to place dot */}
                         <div
-                          className="relative flex-1 rounded-xl border border-zinc-700 cursor-crosshair select-none overflow-hidden"
+                          className="relative flex-1 rounded-xl border border-zinc-700 cursor-crosshair select-none overflow-hidden max-h-48"
                           onClick={e => {
                             const rect = e.currentTarget.getBoundingClientRect();
                             const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
