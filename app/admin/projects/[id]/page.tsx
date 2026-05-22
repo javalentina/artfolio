@@ -348,27 +348,34 @@ export default function ProjectContentEditor() {
                   {p.photoUrl && (
                     <div>
                       <label className={lCls}>Bildausschnitt — klicke auf das Bild um den Fokuspunkt zu setzen</label>
-                      <div
-                        className="relative w-full h-40 overflow-hidden rounded-xl border border-zinc-700 cursor-crosshair select-none"
-                        onClick={e => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-                          const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
-                          upd("performers", content.performers.map((px, j) => j === i ? { ...px, focalX: x, focalY: y } : px));
-                        }}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={p.photoUrl} alt="" draggable={false}
-                          className="h-full w-full object-cover pointer-events-none"
-                          style={{ objectPosition: `${p.focalX}% ${p.focalY}%` }}
-                        />
+                      <div className="flex gap-3 items-start">
+                        {/* Full image — click to place dot */}
                         <div
-                          className="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-primary/70 shadow-md pointer-events-none ring-1 ring-black/30"
-                          style={{ left: `${p.focalX}%`, top: `${p.focalY}%` }}
-                        />
+                          className="relative flex-1 rounded-xl border border-zinc-700 cursor-crosshair select-none overflow-hidden"
+                          onClick={e => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+                            const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+                            upd("performers", content.performers.map((px, j) => j === i ? { ...px, focalX: x, focalY: y } : px));
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={p.photoUrl} alt="" draggable={false} className="w-full h-auto block pointer-events-none" />
+                          <div
+                            className="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-amber-400/80 shadow-md pointer-events-none ring-1 ring-black/40"
+                            style={{ left: `${p.focalX}%`, top: `${p.focalY}%` }}
+                          />
+                        </div>
+                        {/* Circle preview — shows actual result */}
+                        <div className="shrink-0 flex flex-col items-center gap-1.5">
+                          <div className="h-20 w-20 rounded-full overflow-hidden border border-zinc-600 bg-zinc-800">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={p.photoUrl} alt="" className="h-full w-full object-cover" style={{ objectPosition: `${p.focalX}% ${p.focalY}%` }} />
+                          </div>
+                          <p className="text-[10px] text-zinc-500 text-center">Vorschau</p>
+                        </div>
                       </div>
-                      <p className="mt-1 text-xs text-zinc-500">Fokuspunkt: {p.focalX}% · {p.focalY}% — die Kreisfläche auf der Website zeigt diesen Ausschnitt</p>
+                      <p className="mt-1.5 text-xs text-zinc-500">Fokuspunkt: {p.focalX}% · {p.focalY}%</p>
                     </div>
                   )}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
