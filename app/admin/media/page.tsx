@@ -5,6 +5,7 @@ import { Upload, Trash2, Copy, Check, Image as ImageIcon, Pencil, X, GripVertica
 import { createClient } from "@/lib/supabase/client";
 import { loadSettings, patchSettings } from "../_lib";
 import { cn } from "@/lib/utils";
+import { useDragSort } from "../_components/useDragSort";
 
 const ARTIST_ID = "23f1f611-5ba9-4c78-9a71-bd3ea1c7856a";
 
@@ -26,8 +27,13 @@ export default function MediaAdmin() {
   const [editId, setEditId]     = useState<string | null>(null);
   const [altEdit, setAltEdit]   = useState<AltEdit>({ de: "", en: "", ru: "" });
   const [savingOrder, setSavingOrder] = useState(false);
-  const [dragIdx, setDragIdx]   = useState<number | null>(null);
-  const [overIdx, setOverIdx]   = useState<number | null>(null);
+  const { dragIdx, overIdx, getItemProps } = useDragSort(async (from, to) => {
+    const list = [...rows];
+    const [moved] = list.splice(from, 1);
+    list.splice(to, 0, moved);
+    setRows(list);
+    await saveOrder(list);
+  });
   const [uploadError, setUploadError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -58,15 +64,6 @@ export default function MediaAdmin() {
     setSavingOrder(false);
   }
 
-  async function handleDrop(toIdx: number) {
-    if (dragIdx === null || dragIdx === toIdx) { setDragIdx(null); setOverIdx(null); return; }
-    const list = [...rows];
-    const [moved] = list.splice(dragIdx, 1);
-    list.splice(toIdx, 0, moved);
-    setRows(list);
-    setDragIdx(null); setOverIdx(null);
-    await saveOrder(list);
-  }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files ?? []);
@@ -178,11 +175,7 @@ export default function MediaAdmin() {
           {rows.map((row, i) => (
             <div
               key={row.id}
-              draggable
-              onDragStart={() => setDragIdx(i)}
-              onDragOver={e => { e.preventDefault(); setOverIdx(i); }}
-              onDrop={() => handleDrop(i)}
-              onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}
+              {...getItemProps(i)}
               className={cn(
                 "group relative rounded-xl border bg-zinc-900 overflow-hidden transition-all",
                 overIdx === i && dragIdx !== i ? "border-zinc-400 shadow-lg scale-[1.02]" : "border-zinc-800"

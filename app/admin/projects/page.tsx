@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Check, X, Eye, EyeOff, GripVertical, ChevronDown, ChevronUp, LayoutTemplate } from "lucide-react";
 import { MediaImageInput } from "../_components/MediaImageInput";
+import { useDragSort } from "../_components/useDragSort";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { saveEntityVersion } from "../_lib";
@@ -66,8 +67,13 @@ export default function ProjectsAdmin() {
   const [form, setForm] = useState<FormData>(empty);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [dragIdx, setDragIdx] = useState<number | null>(null);
-  const [overIdx, setOverIdx] = useState<number | null>(null);
+  const { dragIdx, overIdx, getItemProps } = useDragSort(async (from, to) => {
+    const list = [...projects];
+    const [moved] = list.splice(from, 1);
+    list.splice(to, 0, moved);
+    await Promise.all(list.map((p, i) => supabase.from("projects").update({ position: i }).eq("id", p.id)));
+    load();
+  });
   const [showContent, setShowContent] = useState(false);
 
   async function load() {
@@ -168,17 +174,6 @@ export default function ProjectsAdmin() {
     load();
   }
 
-  async function handleDrop(toIdx: number) {
-    if (dragIdx === null || dragIdx === toIdx) { setDragIdx(null); setOverIdx(null); return; }
-    const list = [...projects];
-    const [moved] = list.splice(dragIdx, 1);
-    list.splice(toIdx, 0, moved);
-    const updates = list.map((p, i) => supabase.from("projects").update({ position: i }).eq("id", p.id));
-    await Promise.all(updates);
-    setDragIdx(null); setOverIdx(null);
-    load();
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -207,11 +202,7 @@ export default function ProjectsAdmin() {
           {projects.map((p, i) => (
             <div
               key={p.id}
-              draggable
-              onDragStart={() => setDragIdx(i)}
-              onDragOver={e => { e.preventDefault(); setOverIdx(i); }}
-              onDrop={() => handleDrop(i)}
-              onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}
+              {...getItemProps(i)}
               className={cn(
                 "flex items-center gap-3 rounded-xl border bg-zinc-900 p-4 transition-all dark:bg-zinc-900",
                 overIdx === i ? "border-zinc-400 shadow-md" : "border-zinc-800 dark:border-zinc-800"

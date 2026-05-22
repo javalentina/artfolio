@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, Check, X, GripVertical, Download, Upload } from "
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { loadSettings, patchSettings, saveEntityVersion } from "../_lib";
+import { useDragSort } from "../_components/useDragSort";
 
 const ARTIST_ID = "23f1f611-5ba9-4c78-9a71-bd3ea1c7856a";
 
@@ -38,12 +39,23 @@ export default function RepertoireAdmin() {
   const [form, setForm] = useState<FormData>(empty);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [draftLoaded, setDraftLoaded] = useState(false);
-  const [dragIdx, setDragIdx] = useState<number | null>(null);
-  const [overIdx, setOverIdx] = useState<number | null>(null);
   const [tabOrder, setTabOrder] = useState<string[]>([]);
-  const [tabDragIdx, setTabDragIdx] = useState<number | null>(null);
-  const [tabOverIdx, setTabOverIdx] = useState<number | null>(null);
+
+  const rowSort = useDragSort(async (from, to) => {
+    const tabRows = [...list];
+    const [moved] = tabRows.splice(from, 1);
+    tabRows.splice(to, 0, moved);
+    await Promise.all(tabRows.map((r, i) => supabase.from("repertoire").update({ position: i }).eq("id", r.id)));
+    load();
+  });
+
+  const tabSort = useDragSort(async (from, to) => {
+    const next = [...tabs];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setTabOrder(next);
+    await patchSettings(supabase, { repertoire_tab_order: next }, "Tab-Reihenfolge");
+  });
 
   async function load() {
     const { data } = await supabase
@@ -63,16 +75,6 @@ export default function RepertoireAdmin() {
     });
   }, []);
 
-  useEffect(() => {
-    if (!showForm) return;
-    try { localStorage.setItem(`artfolio_repertoire_${editing ?? "new"}`, JSON.stringify(form)); } catch {}
-  }, [form, showForm, editing]);
-
-  function tryLoadDraft(key: string): FormData | null {
-    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; }
-  }
-  function clearDraft(key: string) { try { localStorage.removeItem(key); } catch {} }
-
   const rawTabs = [...new Set(rows.map(r => r.tab))];
   const tabs = rawTabs.slice().sort((a, b) => {
     const ai = tabOrder.indexOf(a); const bi = tabOrder.indexOf(b);
@@ -83,20 +85,9 @@ export default function RepertoireAdmin() {
   });
   const list = rows.filter(r => r.tab === tab);
 
-  async function handleTabDrop(toIdx: number) {
-    if (tabDragIdx === null || tabDragIdx === toIdx) { setTabDragIdx(null); setTabOverIdx(null); return; }
-    const next = [...tabs];
-    const [moved] = next.splice(tabDragIdx, 1);
-    next.splice(toIdx, 0, moved);
-    setTabOrder(next);
-    setTabDragIdx(null); setTabOverIdx(null);
-    await patchSettings(supabase, { repertoire_tab_order: next }, "Tab-Reihenfolge");
-  }
 
   function openNew() {
-    const draft = tryLoadDraft("artfolio_repertoire_new");
-    setForm(draft ?? { ...empty, tab });
-    setDraftLoaded(!!draft);
+    setForm({ ...empty, tab });
     setEditing(null);
     setSaveError(null);
     setShowForm(true);
@@ -115,16 +106,13 @@ export default function RepertoireAdmin() {
   }
 
   function openEdit(r: RepertoireRow) {
-    const base: FormData = {
+    setForm({
       composer_de: r.composer?.de ?? r.composer?.en ?? "",
       composer_ru: r.composer?.ru ?? "",
       works: worksEn(r).join("\n"),
       works_ru: worksRu(r).join("\n"),
       tab: r.tab,
-    };
-    const draft = tryLoadDraft(`artfolio_repertoire_${r.id}`);
-    setForm(draft ?? base);
-    setDraftLoaded(!!draft);
+    });
     setEditing(r.id);
     setSaveError(null);
     setShowForm(true);
@@ -145,19 +133,18 @@ export default function RepertoireAdmin() {
       let savedId = editing;
       if (editing) {
         const { error } = await supabase.from("repertoire").update(payload).eq("id", editing);
-        if (error) throw error;
+        if (error) throw new Error(error.message);
       } else {
         const { data: inserted, error } = await supabase.from("repertoire")
           .insert({ ...payload, artist_id: ARTIST_ID, position: rows.filter(r => r.tab === form.tab).length })
           .select("id").single();
-        if (error) throw error;
+        if (error) throw new Error(error.message);
         savedId = inserted?.id ?? null;
       }
       if (savedId) {
         const label = `Repertoire: ${form.composer_de} (${form.tab})`;
         await saveEntityVersion(supabase, "repertoire", savedId, payload as Record<string, unknown>, label);
       }
-      clearDraft(`artfolio_repertoire_${editing ?? "new"}`);
       setShowForm(false);
       load();
     } catch (e: unknown) {
@@ -173,16 +160,6 @@ export default function RepertoireAdmin() {
     load();
   }
 
-  async function handleDrop(toIdx: number) {
-    if (dragIdx === null || dragIdx === toIdx) { setDragIdx(null); setOverIdx(null); return; }
-    const tabRows = [...list];
-    const [moved] = tabRows.splice(dragIdx, 1);
-    tabRows.splice(toIdx, 0, moved);
-    const updates = tabRows.map((r, i) => supabase.from("repertoire").update({ position: i }).eq("id", r.id));
-    await Promise.all(updates);
-    setDragIdx(null); setOverIdx(null);
-    load();
-  }
 
   function handleExport() {
     const data = JSON.stringify(rows, null, 2);
@@ -241,14 +218,10 @@ export default function RepertoireAdmin() {
         {tabs.map((t, i) => (
           <div
             key={t}
-            draggable
-            onDragStart={() => setTabDragIdx(i)}
-            onDragOver={e => { e.preventDefault(); setTabOverIdx(i); }}
-            onDrop={() => handleTabDrop(i)}
-            onDragEnd={() => { setTabDragIdx(null); setTabOverIdx(null); }}
+            {...tabSort.getItemProps(i)}
             className={cn(
               "group flex items-center gap-1 pb-3 pr-4 shrink-0 cursor-grab transition-all",
-              tabOverIdx === i ? "opacity-50" : ""
+              tabSort.overIdx === i ? "opacity-50" : ""
             )}
           >
             <GripVertical className="h-3.5 w-3.5 text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5 cursor-grab" />
@@ -273,14 +246,10 @@ export default function RepertoireAdmin() {
           {list.map((r, i) => (
             <div
               key={r.id}
-              draggable
-              onDragStart={() => setDragIdx(i)}
-              onDragOver={e => { e.preventDefault(); setOverIdx(i); }}
-              onDrop={() => handleDrop(i)}
-              onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}
+              {...rowSort.getItemProps(i)}
               className={cn(
                 "flex items-center gap-3 rounded-xl border bg-zinc-900 p-4 transition-all dark:bg-zinc-900",
-                overIdx === i ? "border-zinc-400 shadow-md" : "border-zinc-800 dark:border-zinc-800"
+                rowSort.overIdx === i ? "border-zinc-400 shadow-md" : "border-zinc-800 dark:border-zinc-800"
               )}
             >
               <GripVertical className="h-4 w-4 text-zinc-300 cursor-grab shrink-0" />
@@ -316,14 +285,6 @@ export default function RepertoireAdmin() {
               <h2 className="font-medium text-zinc-100">{editing ? "Bearbeiten" : "Neuer Eintrag"}</h2>
               <button onClick={() => setShowForm(false)} className="p-1.5 text-zinc-400 hover:text-zinc-200 rounded-lg"><X className="h-5 w-5" /></button>
             </div>
-            {/* Draft restored banner */}
-            {draftLoaded && (
-              <div className="mx-5 mt-3 flex items-center justify-between rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-xs text-amber-400 shrink-0">
-                <span>Nicht gespeicherte Änderungen wiederhergestellt</span>
-                <button onClick={() => { setDraftLoaded(false); clearDraft(`artfolio_repertoire_${editing ?? "new"}`); setForm(empty); }} className="ml-3 underline hover:text-amber-200 shrink-0">Verwerfen</button>
-              </div>
-            )}
-
             {/* Scrollable body */}
             <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4 lg:grid lg:grid-cols-2 lg:gap-x-6 lg:gap-y-4 lg:space-y-0 lg:content-start">
               <div>
