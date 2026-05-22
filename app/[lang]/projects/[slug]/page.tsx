@@ -293,9 +293,9 @@ export default async function ProjectDetailPage({
             <div className="mx-auto max-w-5xl px-6">
               <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {gallery.map((src, i) => (
-                  <div key={i} className="overflow-hidden">
+                  <div key={i} className="overflow-hidden rounded-sm">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="" className="aspect-[4/5] w-full object-cover transition-transform duration-700 hover:scale-105" />
+                    <img src={src} alt="" className="w-full h-auto transition-transform duration-700 hover:scale-105" />
                   </div>
                 ))}
               </div>
