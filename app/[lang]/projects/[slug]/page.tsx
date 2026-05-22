@@ -22,7 +22,7 @@ function ml(de?: string, en?: string, ru?: string, lang?: Lang) {
   return de || "";
 }
 
-type Performer  = { id: string; name: string; roleDE?: string; roleEN?: string; roleRU?: string; photoUrl?: string };
+type Performer  = { id: string; name: string; roleDE?: string; roleEN?: string; roleRU?: string; photoUrl?: string; focalX?: number; focalY?: number };
 type FlowStep   = { id: string; titleDE?: string; titleEN?: string; titleRU?: string; textDE?: string; textEN?: string; textRU?: string };
 type Testimonial= { id: string; name: string; professionDE?: string; professionEN?: string; professionRU?: string; textDE?: string; textEN?: string; textRU?: string };
 
@@ -251,7 +251,7 @@ export default async function ProjectDetailPage({
                       <div className="mx-auto mb-6 h-32 w-32 overflow-hidden rounded-full border border-primary/20 bg-secondary/30 flex items-center justify-center">
                         {p.photoUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={p.photoUrl} alt={p.name} className="h-full w-full object-cover object-top" />
+                          <img src={p.photoUrl} alt={p.name} className="h-full w-full object-cover" style={{ objectPosition: `${p.focalX ?? 50}% ${p.focalY ?? 20}%` }} />
                         ) : (
                           <span className="font-serif text-2xl font-light text-primary/60">
                             {p.name.split(" ").map(n => n[0]).join("").slice(0, 2)}

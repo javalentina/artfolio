@@ -23,7 +23,7 @@ function mlFrom(v: unknown): ML {
 function str(v: unknown): string { return typeof v === "string" ? v : ""; }
 function uid() { return Math.random().toString(36).slice(2, 10); }
 
-type Performer   = { id: string; name: string; roleDE: string; roleEN: string; roleRU: string; photoUrl: string };
+type Performer   = { id: string; name: string; roleDE: string; roleEN: string; roleRU: string; photoUrl: string; focalX: number; focalY: number };
 type FlowStep    = { id: string; titleDE: string; titleEN: string; titleRU: string; textDE: string; textEN: string; textRU: string };
 type Testimonial = { id: string; name: string; professionDE: string; professionEN: string; professionRU: string; textDE: string; textEN: string; textRU: string };
 
@@ -66,6 +66,7 @@ function fromDB(c: Record<string, unknown>): Content {
     performers:        ((c.performers as Performer[]) ?? []).map(p => ({
       id: p.id ?? uid(), name: p.name ?? "", roleDE: p.roleDE ?? "", roleEN: p.roleEN ?? "",
       roleRU: p.roleRU ?? "", photoUrl: p.photoUrl ?? "",
+      focalX: p.focalX ?? 50, focalY: p.focalY ?? 20,
     })),
     testimonials:      ((c.testimonials as Testimonial[]) ?? []).map(t => ({
       id: t.id ?? uid(), name: t.name ?? "", professionDE: t.professionDE ?? "",
@@ -344,6 +345,32 @@ export default function ProjectContentEditor() {
                         onChange={v => upd("performers", content.performers.map((x, j) => j === i ? { ...x, photoUrl: v } : x))} />
                     </div>
                   </div>
+                  {p.photoUrl && (
+                    <div>
+                      <label className={lCls}>Bildausschnitt — klicke auf das Bild um den Fokuspunkt zu setzen</label>
+                      <div
+                        className="relative w-full h-40 overflow-hidden rounded-xl border border-zinc-700 cursor-crosshair select-none"
+                        onClick={e => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+                          const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+                          upd("performers", content.performers.map((px, j) => j === i ? { ...px, focalX: x, focalY: y } : px));
+                        }}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={p.photoUrl} alt="" draggable={false}
+                          className="h-full w-full object-cover pointer-events-none"
+                          style={{ objectPosition: `${p.focalX}% ${p.focalY}%` }}
+                        />
+                        <div
+                          className="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-primary/70 shadow-md pointer-events-none ring-1 ring-black/30"
+                          style={{ left: `${p.focalX}%`, top: `${p.focalY}%` }}
+                        />
+                      </div>
+                      <p className="mt-1 text-xs text-zinc-500">Fokuspunkt: {p.focalX}% · {p.focalY}% — die Kreisfläche auf der Website zeigt diesen Ausschnitt</p>
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {LANGS.map(l => (
                       <div key={l}>
@@ -355,7 +382,7 @@ export default function ProjectContentEditor() {
                   </div>
                 </div>
               ))}
-              <button onClick={() => upd("performers", [...content.performers, { id: uid(), name: "", roleDE: "", roleEN: "", roleRU: "", photoUrl: "" }])}
+              <button onClick={() => upd("performers", [...content.performers, { id: uid(), name: "", roleDE: "", roleEN: "", roleRU: "", photoUrl: "", focalX: 50, focalY: 20 }])}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-700 py-3 text-sm text-zinc-500 hover:border-zinc-500 hover:text-zinc-300 transition-colors">
                 <Plus className="h-4 w-4" /> Person hinzufügen
               </button>
