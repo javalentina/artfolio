@@ -481,7 +481,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Sup
           <SectionDivider variant="line" />
           <ScrollReveal>
             <div id="repertoire">
-              <RepertoireHomeSection rows={repRows} lang={lang} tabOrder={repTabOrder} />
+              <RepertoireHomeSection rows={repRows} lang={lang} tabOrder={repTabOrder} sectionLabels={sectionLabels} />
             </div>
           </ScrollReveal>
         </>

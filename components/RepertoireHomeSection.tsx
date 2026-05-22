@@ -72,7 +72,7 @@ function ComposerRow({ row, index, lang }: { row: RepertoireRow; index: number; 
   );
 }
 
-export default function RepertoireHomeSection({ rows, lang, tabOrder }: { rows: RepertoireRow[]; lang: string; tabOrder?: string[] }) {
+export default function RepertoireHomeSection({ rows, lang, tabOrder, sectionLabels }: { rows: RepertoireRow[]; lang: string; tabOrder?: string[]; sectionLabels?: Record<string, Record<string,string>> }) {
   const rawTabs = [...new Set(rows.map(r => r.tab))];
   const tabs = tabOrder?.length
     ? rawTabs.slice().sort((a, b) => {
@@ -94,11 +94,12 @@ export default function RepertoireHomeSection({ rows, lang, tabOrder }: { rows: 
   };
   const tabLabel = (k: string) => TAB_LABELS[k]?.[lang] ?? TAB_LABELS[k]?.de ?? k;
 
+  const sl = (key: string) => sectionLabels?.[key]?.[lang] || sectionLabels?.[key]?.de;
   const LABELS: Record<string, Record<string, string>> = {
-    label:    { de: "Repertoire", en: "Repertoire", ru: "Репертуар" },
-    title:    { de: "Ausgewählte Werke", en: "Selected Works", ru: "Избранные произведения" },
-    subtitle: { de: "Ein Überblick über mein pianistisches Repertoire.", en: "An overview of my pianistic repertoire.", ru: "Обзор моего пианистического репертуара." },
-    composers:{ de: "Komponisten", en: "composers", ru: "композиторов" },
+    label:    { de: sl("rep_label")     ?? "Repertoire",                                          en: sl("rep_label")     ?? "Repertoire",                           ru: sl("rep_label")     ?? "Репертуар" },
+    title:    { de: sl("rep_title")     ?? "Ausgewählte Werke",                                   en: sl("rep_title")     ?? "Selected Works",                       ru: sl("rep_title")     ?? "Избранные произведения" },
+    subtitle: { de: sl("rep_subtitle")  ?? "Ein Überblick über mein pianistisches Repertoire.",   en: sl("rep_subtitle")  ?? "An overview of my pianistic repertoire.", ru: sl("rep_subtitle") ?? "Обзор моего пианистического репертуара." },
+    composers:{ de: sl("rep_composers") ?? "Komponisten",                                         en: sl("rep_composers") ?? "composers",                            ru: sl("rep_composers") ?? "композиторов" },
   };
   const t = (k: string) => LABELS[k]?.[lang] ?? LABELS[k]?.de ?? k;
 

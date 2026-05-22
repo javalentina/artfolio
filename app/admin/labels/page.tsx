@@ -45,7 +45,10 @@ const SECTIONS = [
     key: "repertoire",
     heading: "Repertoire",
     fields: [
-      { id: "rep_title", label: "Repertoire — Hauptüberschrift" },
+      { id: "rep_label",     label: "Repertoire — Eyebrow (goldene Zeile)" },
+      { id: "rep_title",     label: "Repertoire — Hauptüberschrift" },
+      { id: "rep_subtitle",  label: "Repertoire — Untertitel (die Zeile darunter)" },
+      { id: "rep_composers", label: "Repertoire — Beschriftung Komponisten-Zähler" },
     ],
   },
   {
@@ -80,7 +83,10 @@ const DEFAULTS: Record<string, Record<string, string>> = {
   vid_title:   { de: "Aufzeichnungen von Auftritten", en: "Recordings", ru: "Записи" },
   gal_title:   { de: "Momente auf der Bühne", en: "Moments on Stage", ru: "Моменты на сцене" },
   proj_title:  { de: "Kreative & Bildungsprojekte", en: "Creative & Educational Projects", ru: "Творческие проекты" },
-  rep_title:   { de: "Ausgewählte Werke", en: "Selected Works", ru: "Избранные произведения" },
+  rep_label:     { de: "Repertoire", en: "Repertoire", ru: "Репертуар" },
+  rep_title:     { de: "Ausgewählte Werke", en: "Selected Works", ru: "Избранные произведения" },
+  rep_subtitle:  { de: "Ein Überblick über mein pianistisches Repertoire.", en: "An overview of my pianistic repertoire.", ru: "Обзор моего пианистического репертуара." },
+  rep_composers: { de: "Komponisten", en: "composers", ru: "композиторов" },
   car_divider: { de: "Werdegang · Career", en: "Career", ru: "Карьера" },
   pub_title:   { de: "Bücher", en: "Books", ru: "Книги" },
   ct_sub:      { de: "Für Konzertanfragen, Unterricht oder Projekte — ich freue mich auf Ihre Nachricht.", en: "For concert enquiries, lessons, or projects — I look forward to hearing from you.", ru: "По вопросам концертов, уроков или проектов — буду рада вашему сообщению." },
