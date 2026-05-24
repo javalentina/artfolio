@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, Star, StarOff, Check, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { saveEntityVersion } from "../_lib";
 import { cn } from "@/lib/utils";
+import { MediaImageInput } from "../_components/MediaImageInput";
 
 type Concert = {
   id: string;
@@ -16,6 +17,7 @@ type Concert = {
   ticket_url: string | null;
   featured: boolean;
   published: boolean;
+  gallery: string[] | null;
 };
 
 type FormData = {
@@ -30,6 +32,7 @@ type FormData = {
   ticket_url: string;
   featured: boolean;
   published: boolean;
+  gallery: string[];
 };
 
 const empty: FormData = {
@@ -38,6 +41,7 @@ const empty: FormData = {
   venue_de: "", city_de: "", country: "",
   ticket_url: "",
   featured: false, published: true,
+  gallery: [],
 };
 
 const inputCls = "w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none";
@@ -52,7 +56,6 @@ export default function ConcertsAdmin() {
   const [form, setForm] = useState<FormData>(empty);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [draftLoaded, setDraftLoaded] = useState(false);
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
 
   const ARTIST_ID = "23f1f611-5ba9-4c78-9a71-bd3ea1c7856a";
@@ -60,7 +63,7 @@ export default function ConcertsAdmin() {
   async function load() {
     const { data } = await supabase
       .from("concerts")
-      .select("id,title,date,venue,city,country,ticket_url,featured,published")
+      .select("id,title,date,venue,city,country,ticket_url,featured,published,gallery")
       .eq("artist_id", ARTIST_ID)
       .order("date", { ascending: false });
     setConcerts((data ?? []) as Concert[]);
@@ -69,33 +72,20 @@ export default function ConcertsAdmin() {
 
   useEffect(() => { load(); }, []);
 
-  // Auto-save draft to localStorage while form is open
-  useEffect(() => {
-    if (!showForm) return;
-    try { localStorage.setItem(`artfolio_concert_${editing ?? "new"}`, JSON.stringify(form)); } catch {}
-  }, [form, showForm, editing]);
-
-  function tryLoadDraft(key: string): FormData | null {
-    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; }
-  }
-  function clearDraft(key: string) { try { localStorage.removeItem(key); } catch {} }
-
   const today = new Date().toISOString().split("T")[0];
   const upcoming = concerts.filter(c => c.date >= today);
   const past = concerts.filter(c => c.date < today);
   const list = tab === "upcoming" ? upcoming : past;
 
   function openNew() {
-    const draft = tryLoadDraft("artfolio_concert_new");
-    setForm(draft ?? empty);
-    setDraftLoaded(!!draft);
+    setForm(empty);
     setEditing(null);
     setSaveError(null);
     setShowForm(true);
   }
 
   function openEdit(c: Concert) {
-    const base: FormData = {
+    setForm({
       title_de: c.title?.de ?? "",
       title_en: c.title?.en ?? "",
       title_ru: c.title?.ru ?? "",
@@ -107,10 +97,8 @@ export default function ConcertsAdmin() {
       ticket_url: c.ticket_url ?? "",
       featured: c.featured,
       published: c.published,
-    };
-    const draft = tryLoadDraft(`artfolio_concert_${c.id}`);
-    setForm(draft ?? base);
-    setDraftLoaded(!!draft);
+      gallery: (c.gallery ?? []).filter(Boolean),
+    });
     setEditing(c.id);
     setSaveError(null);
     setShowForm(true);
@@ -128,22 +116,22 @@ export default function ConcertsAdmin() {
       ticket_url: form.ticket_url || null,
       featured: form.featured,
       published: form.published,
+      gallery: form.gallery.filter(Boolean),
     };
     try {
       let savedId = editing;
       if (editing) {
         const { error } = await supabase.from("concerts").update(payload).eq("id", editing);
-        if (error) throw error;
+        if (error) throw new Error(error.message);
       } else {
         const { data: inserted, error } = await supabase.from("concerts").insert({ ...payload, artist_id: ARTIST_ID }).select("id").single();
-        if (error) throw error;
+        if (error) throw new Error(error.message);
         savedId = inserted?.id ?? null;
       }
       if (savedId) {
         const label = `Konzert: ${form.city_de || form.title_de} (${form.date})`;
         await saveEntityVersion(supabase, "concert", savedId, payload as Record<string, unknown>, label);
       }
-      clearDraft(`artfolio_concert_${editing ?? "new"}`);
       setShowForm(false);
       setEditing(null);
       load();
@@ -255,14 +243,6 @@ export default function ConcertsAdmin() {
               </button>
             </div>
 
-            {/* Draft restored banner */}
-            {draftLoaded && (
-              <div className="mx-5 mt-3 flex items-center justify-between rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-xs text-amber-400 shrink-0">
-                <span>Nicht gespeicherte Änderungen wiederhergestellt</span>
-                <button onClick={() => { setDraftLoaded(false); clearDraft(`artfolio_concert_${editing ?? "new"}`); setForm(empty); }} className="ml-3 underline hover:text-amber-200 shrink-0">Verwerfen</button>
-              </div>
-            )}
-
             {/* Scrollable body */}
             <div className="overflow-y-auto flex-1 px-5 py-5 space-y-5 lg:grid lg:grid-cols-2 lg:gap-x-6 lg:gap-y-5 lg:space-y-0 lg:content-start">
 
@@ -304,6 +284,25 @@ export default function ConcertsAdmin() {
               <div className="lg:col-span-2">
                 <label className={labelCls}>Ticket URL</label>
                 <input className={inputCls} value={form.ticket_url} onChange={e => setForm(f => ({ ...f, ticket_url: e.target.value }))} placeholder="https://…" />
+              </div>
+
+              <div className="lg:col-span-2 space-y-2">
+                <label className={labelCls}>Fotos vom Konzert</label>
+                {form.gallery.map((url, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <MediaImageInput value={url} onChange={v => setForm(f => ({ ...f, gallery: f.gallery.map((u, j) => j === i ? v : u) }))} />
+                    </div>
+                    {url && <img src={url} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover border border-zinc-700" />}
+                    <button type="button" onClick={() => setForm(f => ({ ...f, gallery: f.gallery.filter((_, j) => j !== i) }))} className="shrink-0 text-zinc-600 hover:text-red-400 transition-colors">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+                <button type="button" onClick={() => setForm(f => ({ ...f, gallery: [...f.gallery, ""] }))}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-700 py-2.5 text-sm text-zinc-500 hover:border-zinc-500 hover:text-zinc-300 transition-colors">
+                  <Plus className="h-4 w-4" /> Foto hinzufügen
+                </button>
               </div>
 
               <div className="flex gap-6 pt-1 lg:col-span-2">

@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import { tl } from "@/lib/i18n";
 import type { SupportedLang } from "@/lib/i18n";
 import type { Metadata } from "next";
 import Link from "next/link";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import ConcertsTable from "./ConcertsTable";
 
 const ARTIST_ID = "23f1f611-5ba9-4c78-9a71-bd3ea1c7856a";
 
@@ -22,17 +22,8 @@ type Concert = {
   city: Record<string, string>;
   country: string | null;
   ticket_url: string | null;
+  gallery: string[] | null;
 };
-
-function formatDate(dateStr: string, lang: string) {
-  const d = new Date(dateStr + "T00:00:00");
-  const locale = lang === "ru" ? "ru-RU" : lang === "en" ? "en-GB" : "de-DE";
-  return {
-    short:   d.toLocaleDateString(locale, { day: "numeric", month: "long" }),
-    weekday: d.toLocaleDateString(locale, { weekday: "long" }),
-    year:    d.getFullYear(),
-  };
-}
 
 const LABELS = {
   upcoming: { de: "Bevorstehende Konzerte", en: "Upcoming Concerts", ru: "Ближайшие концерты" },
@@ -47,7 +38,7 @@ export default async function ConcertsPage({ params }: { params: Promise<{ lang:
 
   const { data } = await supabase
     .from("concerts")
-    .select("id,title,date,time,venue,city,country,ticket_url")
+    .select("id,title,date,time,venue,city,country,ticket_url,gallery")
     .eq("artist_id", ARTIST_ID).eq("published", true)
     .order("date", { ascending: true });
 
@@ -55,39 +46,6 @@ export default async function ConcertsPage({ params }: { params: Promise<{ lang:
   const today = new Date().toISOString().split("T")[0];
   const upcoming = all.filter(c => c.date >= today);
   const past = [...all.filter(c => c.date < today)].reverse();
-
-  function ConcertTable({ list, dim = false }: { list: Concert[]; dim?: boolean }) {
-    return (
-      <table className="w-full border-collapse">
-        <tbody>
-          {list.map(c => {
-            const d = formatDate(c.date, lang);
-            return (
-              <tr key={c.id} className={`border-b border-border transition-colors hover:bg-primary/[0.04] cursor-default ${dim ? "opacity-50" : ""}`}>
-                <td className="py-[18px] pr-4 w-32 text-[0.7rem] font-normal uppercase tracking-[0.08em] text-primary whitespace-nowrap">
-                  {d.short}
-                </td>
-                <td className="py-[18px] pr-10 font-serif text-[1.35rem] font-normal">
-                  {tl(c.city, lang) || tl(c.title, lang, "–")}
-                </td>
-                <td className="py-[18px] pr-6 text-[0.75rem] text-muted-fg tracking-[0.05em] hidden sm:table-cell">
-                  {tl(c.venue, lang)}
-                </td>
-                <td className="py-[18px] text-right w-24">
-                  {c.ticket_url && (
-                    <a href={c.ticket_url} target="_blank" rel="noopener noreferrer"
-                      className="text-[0.65rem] uppercase tracking-[0.15em] text-primary border-b border-transparent hover:border-primary transition-colors pb-px">
-                      {LABELS.tickets[lang]}
-                    </a>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    );
-  }
 
   return (
     <main className="max-w-5xl mx-auto px-6 md:px-16 pt-32 pb-24">
@@ -103,7 +61,7 @@ export default async function ConcertsPage({ params }: { params: Promise<{ lang:
       {upcoming.length === 0 ? (
         <p className="text-muted-fg text-sm py-8">{LABELS.none_up[lang]}</p>
       ) : (
-        <ConcertTable list={upcoming} />
+        <ConcertsTable list={upcoming} lang={lang} ticketsLabel={LABELS.tickets[lang]} />
       )}
 
       {past.length > 0 && (
@@ -111,7 +69,7 @@ export default async function ConcertsPage({ params }: { params: Promise<{ lang:
           <h2 className="font-serif text-[clamp(1.8rem,3vw,2.5rem)] font-light text-muted-fg mb-8">
             {LABELS.past[lang]}
           </h2>
-          <ConcertTable list={past} dim />
+          <ConcertsTable list={past} lang={lang} ticketsLabel={LABELS.tickets[lang]} dim />
         </div>
       )}
 
