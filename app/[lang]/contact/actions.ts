@@ -3,6 +3,32 @@
 import { createClient } from "@/lib/supabase/server";
 
 const ARTIST_ID = "23f1f611-5ba9-4c78-9a71-bd3ea1c7856a";
+const NOTIFY_EMAIL = process.env.CONTACT_NOTIFY_EMAIL;
+const RESEND_KEY   = process.env.RESEND_API_KEY;
+
+async function sendNotification(name: string, senderEmail: string, message: string) {
+  if (!RESEND_KEY || !NOTIFY_EMAIL) return;
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${RESEND_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "Artfolio <onboarding@resend.dev>",
+      to: NOTIFY_EMAIL,
+      reply_to: senderEmail,
+      subject: `Neue Nachricht von ${name}`,
+      html: `
+        <p><strong>Von:</strong> ${name} &lt;${senderEmail}&gt;</p>
+        <hr />
+        <p style="white-space:pre-wrap">${message.replace(/</g, "&lt;")}</p>
+        <hr />
+        <p><a href="${process.env.NEXT_PUBLIC_SITE_URL}/admin/submissions">Alle Nachrichten im Admin</a></p>
+      `,
+    }),
+  });
+}
 
 type State = { success: boolean; error?: string } | null;
 
@@ -13,6 +39,10 @@ export async function submitContact(_prev: State, formData: FormData): Promise<S
   const newsletter = formData.get("newsletter") === "on";
 
   if (!name || !email || !message) return { success: false, error: "required" };
+
+  // Honeypot: bots fill this hidden field, humans don't see it
+  const honeypot = (formData.get("website") as string | null) ?? "";
+  if (honeypot) return { success: true }; // silently ignore spam
 
   const supabase = await createClient();
   const { error } = await supabase.from("contact_submissions").insert({
@@ -25,6 +55,8 @@ export async function submitContact(_prev: State, formData: FormData): Promise<S
   });
 
   if (error) return { success: false, error: error.message };
+
+  await sendNotification(name, email, message);
 
   if (newsletter) {
     await supabase.from("newsletter_subscribers").upsert(

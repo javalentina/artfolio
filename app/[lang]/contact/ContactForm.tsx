@@ -36,6 +36,9 @@ export default function ContactForm({ lang }: { lang: string }) {
 
   return (
     <form action={action} className="space-y-8">
+      {/* Honeypot — hidden from humans, bots fill it in */}
+      <input name="website" type="text" tabIndex={-1} aria-hidden="true" style={{ position: "absolute", opacity: 0, pointerEvents: "none", height: 0 }} autoComplete="off" />
+
       <div className="grid sm:grid-cols-2 gap-8">
         <div>
           <label className={labelCls}>{l("name")}</label>
