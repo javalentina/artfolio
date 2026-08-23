@@ -6,6 +6,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 const ARTIST_ID = "23f1f611-5ba9-4c78-9a71-bd3ea1c7856a";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://natalia-uchitel.vercel.app";
+const PERFORMER_NAME: Record<string, string> = { de: "Natalia Uchitel", en: "Natalia Uchitel", ru: "Наталия Учитель" };
 
 type Concert = {
   id: string;
@@ -109,9 +111,38 @@ export default async function ConcertDetailPage({
   const city = tl(c.city, lang);
   const venue = tl(c.venue, lang);
   const desc = c.description ? tl(c.description, lang) : null;
+  const rawTitle = tl(c.title, lang, "–");
+  const eventName = [rawTitle !== "–" ? rawTitle : null, city || null].filter(Boolean).join(" · ") || venue || "Konzert";
+
+  const eventSchema = {
+    "@context": "https://schema.org",
+    "@type": "MusicEvent",
+    "name": eventName,
+    "startDate": c.time ? `${c.date}T${c.time}` : c.date,
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+    "location": {
+      "@type": "Place",
+      "name": venue || city,
+      "address": {
+        "@type": "PostalAddress",
+        ...(city ? { addressLocality: city } : {}),
+        ...(c.country ? { addressCountry: c.country } : {}),
+      },
+    },
+    "performer": { "@type": "Person", "name": PERFORMER_NAME[lang] ?? PERFORMER_NAME.de },
+    "url": `${BASE}/${lang}/concerts/${c.id}`,
+    ...(heroPhoto ? { image: [heroPhoto] } : {}),
+    ...(desc ? { description: desc } : {}),
+    ...(c.ticket_url ? { offers: { "@type": "Offer", url: c.ticket_url, availability: "https://schema.org/InStock" } } : {}),
+  };
 
   return (
     <main className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema).replace(/</g, "\\u003c") }}
+      />
       {/* Hero */}
       <div className="relative h-[55vh] min-h-[340px] w-full overflow-hidden bg-secondary/30">
         {heroPhoto ? (
