@@ -17,22 +17,29 @@ function SaveBtn({ saving, saved, onClick }: { saving: boolean; saved: boolean; 
 
 export default function BioAdmin() {
   const supabase = createClient();
-  const [name, setName]       = useState("");
+  const [name, setName]         = useState("");
+  const [nameDe, setNameDe]     = useState("");
+  const [nameEn, setNameEn]     = useState("");
+  const [nameRu, setNameRu]     = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
-  const [bioDe, setBioDe]     = useState("");
-  const [bioEn, setBioEn]     = useState("");
-  const [bioRu, setBioRu]     = useState("");
-  const [quoteDe, setQuoteDe] = useState("");
-  const [quoteEn, setQuoteEn] = useState("");
-  const [quoteRu, setQuoteRu] = useState("");
-  const [email, setEmail]     = useState("");
-  const [phone, setPhone]     = useState("");
-  const [saving, setSaving]   = useState(false);
-  const [saved, setSaved]     = useState(false);
+  const [bioDe, setBioDe]       = useState("");
+  const [bioEn, setBioEn]       = useState("");
+  const [bioRu, setBioRu]       = useState("");
+  const [quoteDe, setQuoteDe]   = useState("");
+  const [quoteEn, setQuoteEn]   = useState("");
+  const [quoteRu, setQuoteRu]   = useState("");
+  const [email, setEmail]       = useState("");
+  const [phone, setPhone]       = useState("");
+  const [saving, setSaving]     = useState(false);
+  const [saved, setSaved]       = useState(false);
 
   useEffect(() => {
     loadSettings(supabase).then(({ name: n, settings: cfg }) => {
       setName(n);
+      const nameI18n = (cfg.name_i18n as S) ?? {};
+      setNameDe((nameI18n.de as string) ?? n);
+      setNameEn((nameI18n.en as string) ?? n);
+      setNameRu((nameI18n.ru as string) ?? "Наталья Учитель");
       setPhotoUrl((cfg.photo_url as string) ?? "");
       const bio = (cfg.bio as S) ?? {};
       setBioDe((bio.de as string) ?? "");
@@ -50,6 +57,7 @@ export default function BioAdmin() {
   async function save() {
     setSaving(true);
     await patchNameAndSettings(supabase, name, {
+      name_i18n: { de: nameDe || name, en: nameEn || name, ru: nameRu || "Наталья Учитель" },
       photo_url: photoUrl || null,
       bio: { de: bioDe || null, en: bioEn || null, ru: bioRu || null },
       bio_quote: { de: quoteDe || null, en: quoteEn || null, ru: quoteRu || null },
@@ -68,7 +76,18 @@ export default function BioAdmin() {
 
       <div className={cardCls}>
         <h2 className="text-sm font-medium text-zinc-300 dark:text-zinc-300">Profil</h2>
-        <div><label className={labelCls}>Name</label><input className={inputCls} value={name} onChange={e => setName(e.target.value)} /></div>
+        <div><label className={labelCls}>Name (intern / URL)</label><input className={inputCls} value={name} onChange={e => setName(e.target.value)} /></div>
+        <div>
+          <label className={labelCls}>Name auf der Website</label>
+          <div className="space-y-2">
+            {([["DE", nameDe, setNameDe], ["EN", nameEn, setNameEn], ["RU", nameRu, setNameRu]] as const).map(([l, v, set]) => (
+              <div key={l} className="flex items-center gap-2">
+                <span className="w-8 shrink-0 text-xs text-zinc-500 font-mono">{l}</span>
+                <input className={inputCls} value={v} onChange={e => set(e.target.value)} />
+              </div>
+            ))}
+          </div>
+        </div>
         <div>
           <label className={labelCls}>Foto</label>
           <MediaImageInput value={photoUrl} onChange={setPhotoUrl} />

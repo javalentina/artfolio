@@ -188,7 +188,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Sup
         <div className="relative z-10 flex h-full flex-col items-center justify-end pb-[18vh] px-6 text-center animate-reveal-up">
           <p className="text-sm tracking-[0.35em] uppercase text-primary">{t("subtitle", lang)}</p>
           <h1 className="font-serif mt-4 text-6xl font-light leading-[1.05] tracking-tight sm:text-7xl md:text-8xl lg:text-9xl">
-            Natalia Uchitel
+            {tl(s.name_i18n as Record<string,string> | undefined, lang, lang === "ru" ? "Наталья Учитель" : "Natalia Uchitel")}
           </h1>
           <div className="mt-10 flex flex-col sm:flex-row gap-3">
             <a href={`/${lang}#bio`}
