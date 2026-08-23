@@ -97,7 +97,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Sup
     { data: galleryItems },
   ] = await Promise.all([
     supabase.from("artists").select("name,settings").eq("id", ARTIST_ID).single(),
-    supabase.from("concerts").select("id,title,date,venue,city,ticket_url").eq("artist_id", ARTIST_ID).eq("published", true).order("date"),
+    supabase.from("concerts").select("id,title,date,venue,city,ticket_url,gallery").eq("artist_id", ARTIST_ID).eq("published", true).order("date"),
     supabase.from("projects").select("id,title,description,slug").eq("artist_id", ARTIST_ID).eq("published", true).order("position"),
     supabase.from("repertoire").select("id,composer,works,tab,position").eq("artist_id", ARTIST_ID).order("position"),
     supabase.from("media").select("id,url,alt,filename").eq("artist_id", ARTIST_ID),
