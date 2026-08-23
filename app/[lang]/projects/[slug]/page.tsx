@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { SupportedLang } from "@/lib/i18n";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import SectionDivider from "@/components/SectionDivider";
@@ -14,6 +15,47 @@ function tl(o: unknown, lang: Lang, fb = ""): string {
   if (typeof o === "string") return o;
   const m = o as Record<string, string>;
   return m[lang] ?? m.de ?? m.en ?? fb;
+}
+
+const AUTO_DESCRIPTION: Record<Lang, (title: string) => string> = {
+  de: (title) => `${title} — ein Projekt von Natalia Uchitel, Pianistin in Berlin.`,
+  en: (title) => `${title} — a project by Natalia Uchitel, pianist based in Berlin.`,
+  ru: (title) => `${title} — проект пианистки Натальи Учитель (Берлин).`,
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: Lang; slug: string }>;
+}): Promise<Metadata> {
+  const { lang, slug } = await params;
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("projects")
+    .select("title,description,cover_image,content")
+    .eq("artist_id", ARTIST_ID)
+    .eq("slug", slug)
+    .eq("published", true)
+    .single();
+
+  if (!data) return {};
+
+  const c = (data.content ?? {}) as Record<string, unknown>;
+  const title = tl(data.title, lang);
+  const description = tl(data.description, lang) || tl(c.subtitle, lang) || AUTO_DESCRIPTION[lang](title);
+  const image = (c.imageUrl as string) ?? data.cover_image ?? undefined;
+
+  return {
+    title,
+    description: description || undefined,
+    openGraph: {
+      title,
+      description: description || undefined,
+      type: "article",
+      ...(image ? { images: [{ url: image }] } : {}),
+    },
+  };
 }
 
 function ml(de?: string, en?: string, ru?: string, lang?: Lang) {

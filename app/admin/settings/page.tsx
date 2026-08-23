@@ -115,9 +115,65 @@ function ContactSection({ supabase }: { supabase: ReturnType<typeof createClient
   );
 }
 
+// ── SEO ───────────────────────────────────────────────────────────────────────
+
+function SeoSection({ supabase }: { supabase: ReturnType<typeof createClient> }) {
+  const [titleDe, setTitleDe] = useState(""); const [titleEn, setTitleEn] = useState(""); const [titleRu, setTitleRu] = useState("");
+  const [descDe,  setDescDe]  = useState(""); const [descEn,  setDescEn]  = useState(""); const [descRu,  setDescRu]  = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved]   = useState(false);
+
+  useEffect(() => {
+    loadSettings(supabase).then(({ settings: cfg }) => {
+      const seo = (cfg.seo as S) ?? {};
+      const t = (seo.title as S) ?? {}; const d = (seo.description as S) ?? {};
+      setTitleDe((t.de as string) ?? "Natalia Uchitel · Pianistin in Berlin | Konzerte & Projekte");
+      setTitleEn((t.en as string) ?? "Natalia Uchitel · Pianist in Berlin | Concerts & Projects");
+      setTitleRu((t.ru as string) ?? "Наталья Учитель · Пианистка в Берлине | Концерты и проекты");
+      setDescDe((d.de as string) ?? "Natalia Uchitel — Pianistin aus St. Petersburg, tätig in Berlin. Klassische Konzerte, Bildungsprojekte und Repertoire für Veranstalter.");
+      setDescEn((d.en as string) ?? "Natalia Uchitel — Pianist from St. Petersburg, based in Berlin. Classical concerts, educational projects and repertoire for promoters.");
+      setDescRu((d.ru as string) ?? "Наталья Учитель — пианистка из Санкт-Петербурга, живёт в Берлине. Концерты, образовательные проекты и репертуар для организаторов.");
+    });
+  }, []);
+
+  async function save() {
+    setSaving(true);
+    await patchSettings(supabase, {
+      seo: { title: { de: titleDe, en: titleEn, ru: titleRu }, description: { de: descDe, en: descEn, ru: descRu } },
+    }, "SEO");
+    setSaving(false); setSaved(true); setTimeout(() => setSaved(false), 2500);
+  }
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-zinc-500">Titel und Beschreibung die in Google und bei Social-Media-Links erscheinen. Empfehlung: Titel max. 60 Zeichen, Beschreibung max. 160 Zeichen.</p>
+      <div className={cardCls}>
+        <h2 className="text-sm font-medium text-zinc-300">Seitentitel</h2>
+        {([["DE", titleDe, setTitleDe], ["EN", titleEn, setTitleEn], ["RU", titleRu, setTitleRu]] as const).map(([l, v, set]) => (
+          <div key={l}>
+            <label className={labelCls}>{l} <span className="normal-case text-zinc-600">({v.length} Zeichen)</span></label>
+            <input className={inputCls} value={v} onChange={e => set(e.target.value)} />
+          </div>
+        ))}
+      </div>
+      <div className={cardCls}>
+        <h2 className="text-sm font-medium text-zinc-300">Beschreibung (Meta Description)</h2>
+        {([["DE", descDe, setDescDe], ["EN", descEn, setDescEn], ["RU", descRu, setDescRu]] as const).map(([l, v, set]) => (
+          <div key={l}>
+            <label className={labelCls}>{l} <span className="normal-case text-zinc-600">({v.length} / 160 Zeichen)</span></label>
+            <textarea className={inputCls + " resize-none"} rows={3} value={v} onChange={e => set(e.target.value)} />
+          </div>
+        ))}
+      </div>
+      <SaveBtn saving={saving} saved={saved} onClick={save} />
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 const TABS = [
+  { id: "seo",     label: "SEO / Google" },
   { id: "podcast", label: "Podcast" },
   { id: "contact", label: "Kontakt & Social" },
 ] as const;
@@ -131,7 +187,7 @@ export default function SettingsAdmin() {
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-light tracking-wide">Einstellungen</h1>
-        <p className="mt-0.5 text-sm text-zinc-500">Podcast & Kontakt</p>
+        <p className="mt-0.5 text-sm text-zinc-500">SEO, Podcast & Kontakt</p>
       </div>
 
       <div className="flex flex-wrap gap-1 mb-8 border-b border-zinc-800 dark:border-zinc-800">
@@ -148,6 +204,7 @@ export default function SettingsAdmin() {
       </div>
 
       <div className="max-w-xl">
+        {tab === "seo"     && <SeoSection     supabase={supabase} />}
         {tab === "podcast" && <PodcastSection supabase={supabase} />}
         {tab === "contact" && <ContactSection supabase={supabase} />}
       </div>

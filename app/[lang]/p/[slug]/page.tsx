@@ -25,7 +25,7 @@ export async function generateMetadata({
 
   const { data: page } = await supabase
     .from("pages")
-    .select("title")
+    .select("title,seo_title,seo_description,seo_image")
     .eq("artist_id", ARTIST_ID)
     .eq("published", true)
     .filter(`slug->>'de'`, "eq", slug)
@@ -33,8 +33,26 @@ export async function generateMetadata({
 
   if (!page) return {};
 
+  const title = tl(page.seo_title as Record<string, string> | null, lang as SupportedLang, "")
+    || tl(page.title as Record<string, string>, lang as SupportedLang, slug);
+  const AUTO_DESCRIPTION: Record<SupportedLang, string> = {
+    de: `${title} — Natalia Uchitel, Pianistin in Berlin.`,
+    en: `${title} — Natalia Uchitel, pianist based in Berlin.`,
+    ru: `${title} — Наталья Учитель, пианистка (Берлин).`,
+  };
+  const description = tl(page.seo_description as Record<string, string> | null, lang as SupportedLang, "")
+    || AUTO_DESCRIPTION[lang as SupportedLang];
+  const image = page.seo_image as string | null;
+
   return {
-    title: tl(page.title as Record<string, string>, lang as SupportedLang, slug),
+    title,
+    description: description || undefined,
+    openGraph: {
+      title,
+      description: description || undefined,
+      type: "article",
+      ...(image ? { images: [{ url: image }] } : {}),
+    },
   };
 }
 
