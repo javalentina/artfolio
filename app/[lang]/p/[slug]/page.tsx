@@ -38,7 +38,7 @@ export async function generateMetadata({
   const AUTO_DESCRIPTION: Record<SupportedLang, string> = {
     de: `${title} — Natalia Uchitel, Pianistin in Berlin.`,
     en: `${title} — Natalia Uchitel, pianist based in Berlin.`,
-    ru: `${title} — Наталья Учитель, пианистка (Берлин).`,
+    ru: `${title} — Наталия Учитель, пианистка (Берлин).`,
   };
   const description = tl(page.seo_description as Record<string, string> | null, lang as SupportedLang, "")
     || AUTO_DESCRIPTION[lang as SupportedLang];

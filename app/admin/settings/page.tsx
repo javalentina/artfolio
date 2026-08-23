@@ -129,10 +129,10 @@ function SeoSection({ supabase }: { supabase: ReturnType<typeof createClient> })
       const t = (seo.title as S) ?? {}; const d = (seo.description as S) ?? {};
       setTitleDe((t.de as string) ?? "Natalia Uchitel · Pianistin in Berlin | Konzerte & Projekte");
       setTitleEn((t.en as string) ?? "Natalia Uchitel · Pianist in Berlin | Concerts & Projects");
-      setTitleRu((t.ru as string) ?? "Наталья Учитель · Пианистка в Берлине | Концерты и проекты");
+      setTitleRu((t.ru as string) ?? "Наталия Учитель · Пианистка в Берлине | Концерты и проекты");
       setDescDe((d.de as string) ?? "Natalia Uchitel — Pianistin aus St. Petersburg, tätig in Berlin. Klassische Konzerte, Bildungsprojekte und Repertoire für Veranstalter.");
       setDescEn((d.en as string) ?? "Natalia Uchitel — Pianist from St. Petersburg, based in Berlin. Classical concerts, educational projects and repertoire for promoters.");
-      setDescRu((d.ru as string) ?? "Наталья Учитель — пианистка из Санкт-Петербурга, живёт в Берлине. Концерты, образовательные проекты и репертуар для организаторов.");
+      setDescRu((d.ru as string) ?? "Наталия Учитель — пианистка из Санкт-Петербурга, живёт в Берлине. Концерты, образовательные проекты и репертуар для организаторов.");
     });
   }, []);
 

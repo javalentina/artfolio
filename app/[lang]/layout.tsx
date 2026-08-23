@@ -14,12 +14,12 @@ const ARTIST_ID = "23f1f611-5ba9-4c78-9a71-bd3ea1c7856a";
 const DEFAULT_TITLES: Record<string, string> = {
   de: "Natalia Uchitel · Pianistin in Berlin | Konzerte & Projekte",
   en: "Natalia Uchitel · Pianist in Berlin | Concerts & Projects",
-  ru: "Наталья Учитель · Пианистка в Берлине | Концерты и проекты",
+  ru: "Наталия Учитель · Пианистка в Берлине | Концерты и проекты",
 };
 const DEFAULT_DESCS: Record<string, string> = {
   de: "Natalia Uchitel — Pianistin aus St. Petersburg, tätig in Berlin. Klassische Konzerte, Bildungsprojekte und Repertoire für Veranstalter.",
   en: "Natalia Uchitel — Pianist from St. Petersburg, based in Berlin. Classical concerts, educational projects and repertoire for promoters.",
-  ru: "Наталья Учитель — пианистка из Санкт-Петербурга, живёт в Берлине. Концерты, образовательные проекты и репертуар для организаторов.",
+  ru: "Наталия Учитель — пианистка из Санкт-Петербурга, живёт в Берлине. Концерты, образовательные проекты и репертуар для организаторов.",
 };
 
 export async function generateMetadata({

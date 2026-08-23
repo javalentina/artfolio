@@ -39,7 +39,7 @@ export default function BioAdmin() {
       const nameI18n = (cfg.name_i18n as S) ?? {};
       setNameDe((nameI18n.de as string) ?? n);
       setNameEn((nameI18n.en as string) ?? n);
-      setNameRu((nameI18n.ru as string) ?? "Наталья Учитель");
+      setNameRu((nameI18n.ru as string) ?? "Наталия Учитель");
       setPhotoUrl((cfg.photo_url as string) ?? "");
       const bio = (cfg.bio as S) ?? {};
       setBioDe((bio.de as string) ?? "");
@@ -57,7 +57,7 @@ export default function BioAdmin() {
   async function save() {
     setSaving(true);
     await patchNameAndSettings(supabase, name, {
-      name_i18n: { de: nameDe || name, en: nameEn || name, ru: nameRu || "Наталья Учитель" },
+      name_i18n: { de: nameDe || name, en: nameEn || name, ru: nameRu || "Наталия Учитель" },
       photo_url: photoUrl || null,
       bio: { de: bioDe || null, en: bioEn || null, ru: bioRu || null },
       bio_quote: { de: quoteDe || null, en: quoteEn || null, ru: quoteRu || null },
