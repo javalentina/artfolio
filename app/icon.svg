@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="4" fill="#1a1a1a"/>
+  <!-- 7 white keys (dark background creates hairline separation between keys) -->
+  <rect x="1"    y="3" width="4"   height="26" rx="1" fill="#ede8df"/>
+  <rect x="5.3"  y="3" width="4"   height="26" rx="1" fill="#ede8df"/>
+  <rect x="9.6"  y="3" width="4"   height="26" rx="1" fill="#ede8df"/>
+  <rect x="13.9" y="3" width="4"   height="26" rx="1" fill="#ede8df"/>
+  <rect x="18.2" y="3" width="4"   height="26" rx="1" fill="#ede8df"/>
+  <rect x="22.5" y="3" width="4"   height="26" rx="1" fill="#ede8df"/>
+  <rect x="26.8" y="3" width="4.2" height="26" rx="1" fill="#ede8df"/>
+  <!-- 5 black keys: C# D# · F# G# A# -->
+  <rect x="4"    y="3" width="2.5" height="15" rx="0.5" fill="#111"/>
+  <rect x="8.3"  y="3" width="2.5" height="15" rx="0.5" fill="#111"/>
+  <rect x="16.9" y="3" width="2.5" height="15" rx="0.5" fill="#111"/>
+  <rect x="21.2" y="3" width="2.5" height="15" rx="0.5" fill="#111"/>
+  <rect x="25.5" y="3" width="2.5" height="15" rx="0.5" fill="#111"/>
+</svg>
