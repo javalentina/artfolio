@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 
-import Script from "next/script";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { tl } from "@/lib/i18n";
@@ -137,11 +136,14 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Sup
   const repRows  = (repertoireRows ?? []) as RepertoireRow[];
 
   const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://natalia-uchitel.vercel.app";
+  const nameI18n = (s.name_i18n as Record<string, string> | undefined) ?? {};
+  const sameAs = [social.instagram, social.youtube, social.telegram, social.spotify].filter(Boolean);
   const personSchema = {
     "@context": "https://schema.org",
     "@type": "Person",
-    "name": "Natalia Uchitel",
-    "alternateName": "Наталья Учитель",
+    "name": tl(nameI18n, lang, "Natalia Uchitel"),
+    "alternateName": [...new Set([nameI18n.de, nameI18n.en, nameI18n.ru].filter(Boolean))]
+      .filter(n => n !== tl(nameI18n, lang, "Natalia Uchitel")),
     "jobTitle": lang === "ru" ? "Пианистка" : lang === "en" ? "Pianist" : "Pianistin",
     "description": lang === "ru"
       ? "Пианистка из Санкт-Петербурга, живёт в Берлине. Концерты, образовательные проекты, Академия искусств Эссен."
@@ -152,7 +154,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Sup
     "birthPlace": { "@type": "Place", "name": "St. Petersburg, Russia" },
     "nationality": "Russian",
     "url": `${BASE}/${lang}`,
-    "sameAs": [],
+    "sameAs": sameAs,
     "alumniOf": [
       { "@type": "EducationalOrganization", "name": "St. Petersburg Conservatory" },
       { "@type": "EducationalOrganization", "name": "Academy of Arts Essen" },
@@ -168,10 +170,9 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Sup
 
   return (
     <>
-      <Script
-        id="person-schema"
+      <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema).replace(/</g, "\\u003c") }}
       />
       {/* ── HERO ── */}
       <section className="relative h-screen w-full overflow-hidden">
@@ -188,7 +189,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Sup
         <div className="relative z-10 flex h-full flex-col items-center justify-end pb-[18vh] px-6 text-center animate-reveal-up">
           <p className="text-sm tracking-[0.35em] uppercase text-primary">{t("subtitle", lang)}</p>
           <h1 className="font-serif mt-4 text-6xl font-light leading-[1.05] tracking-tight sm:text-7xl md:text-8xl lg:text-9xl">
-            {tl(s.name_i18n as Record<string,string> | undefined, lang, lang === "ru" ? "Наталья Учитель" : "Natalia Uchitel")}
+            {tl(s.name_i18n as Record<string,string> | undefined, lang, lang === "ru" ? "Наталия Учитель" : "Natalia Uchitel")}
           </h1>
           <div className="mt-10 flex flex-col sm:flex-row gap-3">
             <a href={`/${lang}#bio`}
