@@ -33,11 +33,11 @@ const L: Record<string, Record<string, string>> = {
 const t = (k: string, lang: string) => L[k]?.[lang] ?? L[k]?.de ?? "";
 
 // ── Reusable section header ───────────────────────────────────────────────────
-function SectionHead({ icon, label, title }: { icon: string; label: string; title: string }) {
+function SectionHead({ icon, label, title }: { icon?: string; label: string; title: string }) {
   return (
     <div className="mb-12 md:mb-16">
       <p className="flex items-center gap-2 text-xs uppercase tracking-[0.35em] text-primary mb-5">
-        <span>{icon}</span>{label}
+        {icon && <span>{icon}</span>}{label}
       </p>
       <h2 className="font-serif text-[clamp(2.2rem,5vw,3.5rem)] font-light leading-tight">{title}</h2>
     </div>
@@ -212,7 +212,7 @@ export default async function LebenslaufPage({ params }: { params: Promise<{ lan
           <div className="mx-auto max-w-5xl px-5 sm:px-8 md:px-12 grid md:grid-cols-2 gap-16 md:gap-20">
             {awards.length > 0 && (
               <div>
-                <SectionHead icon="♕" label={t("awardsLabel", lang)} title={t("awardsTitle", lang)} />
+                <SectionHead label={t("awardsLabel", lang)} title={t("awardsTitle", lang)} />
                 <div className="space-y-6">
                   {awards.map(a => (
                     <div key={a.id}>
@@ -256,7 +256,11 @@ export default async function LebenslaufPage({ params }: { params: Promise<{ lan
 
             {languages.length > 0 && (
               <div>
-                <SectionHead icon="◈" label={t("langLabel", lang)} title={t("langTitle", lang)} />
+                <div className="mb-12 md:mb-16">
+                  <p className="flex items-center gap-2 text-xs uppercase tracking-[0.35em] text-primary mb-5">
+                    <span>◈</span>{t("langLabel", lang)}
+                  </p>
+                </div>
                 <div className="space-y-4">
                   {languages.map(l => (
                     <div key={l.id} className="flex items-baseline justify-between gap-4 border-b border-border/20 pb-4">

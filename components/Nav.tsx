@@ -80,7 +80,7 @@ export default function Nav({ lang }: { lang: SupportedLang }) {
         {/* Close button */}
         <button
           onClick={() => setOpen(false)}
-          className="absolute top-5 left-6 flex h-10 w-10 flex-col justify-center gap-[5px] p-1"
+          className="absolute top-5 right-6 flex h-10 w-10 cursor-pointer flex-col justify-center gap-[5px] p-1"
           aria-label="Close menu"
         >
           <span className="block h-px w-[22px] bg-foreground translate-y-[6px] rotate-45 transition-all duration-300" />
@@ -145,7 +145,7 @@ export default function Nav({ lang }: { lang: SupportedLang }) {
                   key={l}
                   onClick={() => { setOpen(false); switchLang(l); }}
                   className={cn(
-                    "text-[11px] uppercase tracking-[0.2em] transition-colors",
+                    "cursor-pointer text-[11px] uppercase tracking-[0.2em] transition-colors",
                     l === lang ? "text-primary" : "text-foreground/30 hover:text-primary"
                   )}
                 >
@@ -189,7 +189,7 @@ export default function Nav({ lang }: { lang: SupportedLang }) {
               key={l}
               onClick={() => switchLang(l)}
               className={cn(
-                "text-[0.6rem] uppercase tracking-[0.15em] transition-colors",
+                "cursor-pointer text-[0.6rem] uppercase tracking-[0.15em] transition-colors",
                 l === lang ? "text-primary" : "text-foreground/30 hover:text-primary"
               )}
             >
