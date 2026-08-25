@@ -34,6 +34,18 @@ function parseWorks(works: string[]) {
   }));
 }
 
+const TAB_LABELS: Record<string, Record<string, string>> = {
+  solo:    { de: "Solo", en: "Solo", ru: "Соло" },
+  chamber: { de: "Kammermusik", en: "Chamber Music", ru: "Камерная" },
+  duo:     { de: "Duo", en: "Duo", ru: "Дуэт" },
+  vocal:   { de: "Vokal", en: "Vocal", ru: "Вокал" },
+  "Contemporary composers": { de: "Zeitgenössische Komponisten", en: "Contemporary composers", ru: "Современные композиторы" },
+  "Other repertoire":       { de: "Weiteres Repertoire", en: "Other repertoire", ru: "Прочий репертуар" },
+};
+function tabLabel(tab: string, lang: string): string {
+  return TAB_LABELS[tab]?.[lang] ?? TAB_LABELS[tab]?.de ?? tab;
+}
+
 export default async function RepertoirePage({ params }: { params: Promise<{ lang: SupportedLang }> }) {
   const { lang } = await params;
   const supabase = await createClient();
@@ -65,7 +77,7 @@ export default async function RepertoirePage({ params }: { params: Promise<{ lan
             {/* Tab header */}
             <div className="max-w-5xl mx-auto px-6 md:px-16 py-10">
               <div className="flex items-center gap-4">
-                <span className="font-serif text-[1.4rem] font-light capitalize text-muted-fg">{tab}</span>
+                <span className="font-serif text-[1.4rem] font-light capitalize text-muted-fg">{tabLabel(tab, lang)}</span>
                 <span className="flex-1 border-t border-border" />
               </div>
             </div>

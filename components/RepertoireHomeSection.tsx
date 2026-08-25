@@ -91,6 +91,8 @@ export default function RepertoireHomeSection({ rows, lang, tabOrder, sectionLab
     chamber: { de: "Kammermusik", en: "Chamber Music", ru: "Камерная" },
     duo:     { de: "Duo", en: "Duo", ru: "Дуэт" },
     vocal:   { de: "Vokal", en: "Vocal", ru: "Вокал" },
+    "Contemporary composers": { de: "Zeitgenössische Komponisten", en: "Contemporary composers", ru: "Современные композиторы" },
+    "Other repertoire":       { de: "Weiteres Repertoire", en: "Other repertoire", ru: "Прочий репертуар" },
   };
   const tabLabel = (k: string) => TAB_LABELS[k]?.[lang] ?? TAB_LABELS[k]?.de ?? k;
 
