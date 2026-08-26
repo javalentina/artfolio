@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { SupportedLang } from "@/lib/i18n";
@@ -37,6 +37,11 @@ export default function Nav({ lang }: { lang: SupportedLang }) {
   const { open, setOpen } = useNav();
   const isHome = /^\/(de|en|ru)\/?$/.test(pathname);
   const [stickyVisible, setStickyVisible] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open) panelRef.current?.scrollTo(0, 0);
+  }, [open]);
 
   useEffect(() => {
     if (!isHome) {
@@ -69,10 +74,11 @@ export default function Nav({ lang }: { lang: SupportedLang }) {
     <>
       {/* ── Slide-out panel ── */}
       <div
+        ref={panelRef}
         className={cn(
           "fixed inset-y-0 left-0 z-[60] w-full border-r border-primary/20",
           "bg-background/[0.97] backdrop-blur-xl",
-          "flex flex-col justify-center overflow-y-auto",
+          "flex flex-col justify-start overflow-y-auto",
           "transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
           open ? "translate-x-0" : "-translate-x-full"
         )}
@@ -80,7 +86,7 @@ export default function Nav({ lang }: { lang: SupportedLang }) {
         {/* Close button */}
         <button
           onClick={() => setOpen(false)}
-          className="absolute top-5 right-6 flex h-10 w-10 cursor-pointer flex-col justify-center gap-[5px] p-1"
+          className="absolute top-5 right-6 z-10 flex h-10 w-10 cursor-pointer flex-col justify-center gap-[5px] rounded-full bg-background p-1"
           aria-label="Close menu"
         >
           <span className="block h-px w-[22px] bg-foreground translate-y-[6px] rotate-45 transition-all duration-300" />
